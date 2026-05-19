@@ -1,0 +1,123 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "roll": { "type": "string" },
+        "course": { "type": "string" },
+        "semester": { "type": "string" },
+        "photo": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "regIP": { "type": "string" },
+        "regAt": { "type": "string" }
+      },
+      "required": ["id", "email", "name", "roll", "status"]
+    },
+    "AttendanceRecord": {
+      "title": "Attendance Record",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "subjects": { "type": "object" }
+      },
+      "required": ["date", "subjects"]
+    },
+    "PunchRecord": {
+      "title": "Punch Record",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string" },
+        "in": { "type": "string" },
+        "out": { "type": "string" }
+      },
+      "required": ["date"]
+    },
+    "Notice": {
+      "title": "Campus Notice",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "tag": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "warning", "critical"] }
+      },
+      "required": ["id", "title", "date", "tag", "type"]
+    },
+    "SubjectConfig": {
+      "title": "Subject Total Classes",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "totalClasses": { "type": "number" }
+      },
+      "required": ["code", "totalClasses"]
+    },
+    "Material": {
+      "title": "Study Material",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "subjectCode": { "type": "string" },
+        "title": { "type": "string" },
+        "driveLink": { "type": "string" }
+      },
+      "required": ["id", "subjectCode", "title", "driveLink"]
+    },
+    "Result": {
+      "title": "Exam Result",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "link": { "type": "string" },
+        "publishedAt": { "type": "number" }
+      },
+      "required": ["id", "title", "link", "publishedAt"]
+    },
+    "Faculty": {
+      "title": "Faculty Member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "designation": { "type": "string" },
+        "subjects": { "type": "array", "items": { "type": "string" } },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "image": { "type": "string" },
+        "addedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "designation"]
+    },
+    "Routine": {
+      "title": "Routine Item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "day": { "type": "string" },
+        "time": { "type": "string" },
+        "subj": { "type": "string" },
+        "room": { "type": "string" },
+        "prof": { "type": "string" },
+        "isBreak": { "type": "boolean" }
+      },
+      "required": ["id", "day", "time", "subj"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "Student profiles" },
+    "/users/{userId}/attendance/{date}": { "schema": "AttendanceRecord", "description": "Daily attendance for a student" },
+    "/users/{userId}/punches/{date}": { "schema": "PunchRecord", "description": "Daily punch in/out times" },
+    "/notices/{noticeId}": { "schema": "Notice", "description": "Global campus notices" },
+    "/subjects/{subjectCode}": { "schema": "SubjectConfig", "description": "Global class counters" },
+    "/materials/{materialId}": { "schema": "Material", "description": "Academic study notes" },
+    "/results/{resultId}": { "schema": "Result", "description": "Exam result updates" },
+    "/faculties/{facultyId}": { "schema": "Faculty", "description": "Campus faculty directory" },
+    "/routine/{routineId}": { "schema": "Routine", "description": "Class schedule routine" }
+  }
+}
