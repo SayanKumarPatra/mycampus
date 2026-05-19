@@ -1,6 +1,0 @@
-{
-  "name": "MyCampus",
-  "description": "Smart Student Portal designed for EIILM Kolkata Students.",
-  "requestFramePermissions": ["geolocation"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
