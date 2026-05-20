@@ -42,99 +42,20 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
   const [activePage, setActivePage] = useState<PageId>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [locationStatus, setLocationStatus] = useState<'checking' | 'at-campus' | 'outside' | 'denied'>('checking');
   const [attConfig, setAttConfig] = useState<AttendanceConfig>({ subjects: [], materials: [] });
-  const [punchTime, setPunchTime] = useState<{in: string | null, out: string | null}>({ in: null, out: null });
-
-  // Get punch data from Firestore on mount
-  useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    attendanceService.getPunchData(user.id, today).then(setPunchTime);
-  }, [user.id]);
-
-  // Save punch data whenever it changes
-  const savePunch = async (times: {in: string | null, out: string | null}) => {
-    const today = new Date().toISOString().slice(0, 10);
-    setPunchTime(times);
-    await attendanceService.savePunchData(user.id, today, times);
-  };
-
-  // Campus DN-9 Coordinates (EIILM Salt Lake)
-  const CAMPUS_COORDS = { lat: 22.5726, lng: 88.4348 };
 
   useEffect(() => {
     const unsub = attendanceService.subscribeToGlobalConfig(setAttConfig);
     
     const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(now);
-      
-      // Auto-reset at midnight
-      if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-        setPunchTime({ in: null, out: null });
-      }
+      setCurrentTime(new Date());
     }, 1000);
-    
-    // Geolocation monitoring
-    if ('geolocation' in navigator) {
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const dist = calculateDistance(pos.coords.latitude, pos.coords.longitude, CAMPUS_COORDS.lat, CAMPUS_COORDS.lng);
-          
-          if (dist < 0.25) { 
-            if (locationStatus !== 'at-campus') {
-              setLocationStatus('at-campus');
-              setPunchTime(prev => {
-                if (!prev.in) {
-                  const newTimes = { ...prev, in: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-                  savePunch(newTimes);
-                  return newTimes;
-                }
-                return prev;
-              });
-            }
-          } else {
-            if (locationStatus === 'at-campus') {
-              setLocationStatus('outside');
-              setPunchTime(prev => {
-                if (prev.in) {
-                  const newTimes = { ...prev, out: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-                  savePunch(newTimes);
-                  return newTimes;
-                }
-                return prev;
-              });
-            } else if (locationStatus === 'checking') {
-              setLocationStatus('outside');
-            }
-          }
-        },
-        () => setLocationStatus('denied'),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-      return () => {
-        unsub();
-        clearInterval(timer);
-        navigator.geolocation.clearWatch(watchId);
-      };
-    }
     
     return () => {
       unsub();
       clearInterval(timer);
     };
-  }, [locationStatus, user.id]);
-
-  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 6371; // km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
+  }, []);
 
   interface NavPage {
     id: string;
@@ -199,39 +120,16 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       </header>
 
       {/* Info Bar */}
-      <div className="bg-db2 border-b border-wh/5 px-4 h-10 flex items-center justify-between shrink-0 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="flex items-center gap-1.5">
-            <Clock size={12} className="text-sf" />
-            <span className="text-[10px] font-bold text-wh/90 whitespace-nowrap">
-              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-            <span className="text-[10px] text-wh/40 font-bold uppercase tracking-wider ml-1">
-              {currentTime.toLocaleDateString([], { weekday: 'short', day: 'numeric' })}
-            </span>
-          </div>
-          
-          <div className="h-3 w-px bg-wh/10" />
-          
-          <div className="flex items-center gap-1.5">
-            <div className={`w-1.5 h-1.5 rounded-full ${locationStatus === 'at-campus' ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-            <span className={`text-[9px] font-black uppercase tracking-widest ${locationStatus === 'at-campus' ? 'text-green-400' : 'text-red-400'}`}>
-              {locationStatus === 'at-campus' ? 'Campus DN-9' : 'Outside'}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="flex items-center gap-1">
-            <LogIn size={10} className="text-sf" />
-            <span className="text-[10px] text-wh/60 font-bold uppercase tracking-tighter">In:</span>
-            <span className="text-[10px] text-wh font-bold">{punchTime.in || '--:--'}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <LogOutIcon size={10} className="text-sf" />
-            <span className="text-[10px] text-wh/60 font-bold uppercase tracking-tighter">Out:</span>
-            <span className="text-[10px] text-wh font-bold">{punchTime.out || '--:--'}</span>
-          </div>
+      <div className="bg-db2 border-b border-wh/5 px-4 h-10 flex items-center justify-center shrink-0 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 justify-center">
+          <Clock size={12} className="text-sf animate-pulse" />
+          <span className="text-[10px] font-black text-wh/95 tracking-wide whitespace-nowrap">
+            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-wh/20 block" />
+          <span className="text-[10px] text-wh/70 font-bold uppercase tracking-wider">
+            {currentTime.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}
+          </span>
         </div>
       </div>
 
@@ -398,7 +296,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                {activePage === 'home' && <Home user={user} onNavigate={setActivePage} isAtCampus={locationStatus === 'at-campus'} />}
+                {activePage === 'home' && <Home user={user} onNavigate={setActivePage} />}
                 {activePage === 'attendance' && <Attendance user={user} />}
                 {activePage === 'notes' && <Notes />}
                 {activePage === 'results' && <Results />}

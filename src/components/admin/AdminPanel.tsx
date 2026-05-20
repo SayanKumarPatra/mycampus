@@ -173,7 +173,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     const faculty = {
       id: `fac_${Date.now()}`,
       ...newFaculty,
-      subjects: newFaculty.subjects.split(',').map(s => s.trim()).filter(s => s !== ''),
+      subjects: (newFaculty.subjects || '').split(',').map(s => s.trim()).filter(s => s !== ''),
       addedAt: Date.now()
     };
 
@@ -243,7 +243,10 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     .filter(u => {
       const matchesTab = activeTab === 'all' ? true : u.status === activeTab;
       const q = searchQuery.toLowerCase();
-      const matchesSearch = u.name.toLowerCase().includes(q) || u.roll.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+      const matchesSearch = 
+        (u.name || '').toLowerCase().includes(q) || 
+        (u.roll || '').toLowerCase().includes(q) || 
+        (u.email || '').toLowerCase().includes(q);
       return matchesTab && matchesSearch;
     })
     .sort((a, b) => b.registeredAt - a.registeredAt);

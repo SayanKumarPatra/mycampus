@@ -16,7 +16,7 @@ export default function Notices() {
   }, []);
 
   const filteredNotices = (config.notices || [])
-    .filter(n => n.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(n => (n.title || '').toLowerCase().includes((searchTerm || '').toLowerCase()))
     .sort((a, b) => b.publishedAt - a.publishedAt);
 
   return (

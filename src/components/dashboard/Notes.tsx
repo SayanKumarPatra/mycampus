@@ -18,7 +18,7 @@ export default function Notes() {
   }, []);
 
   const filteredMaterials = (config.materials || []).filter(m => {
-    const matchesSearch = m.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (m.title || '').toLowerCase().includes((searchTerm || '').toLowerCase());
     const matchesSubject = selectedSubject === 'all' || m.subjectCode === selectedSubject;
     return matchesSearch && matchesSubject;
   });

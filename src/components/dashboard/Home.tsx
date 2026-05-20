@@ -11,10 +11,9 @@ import { getInitials } from '../../utils';
 interface HomeProps {
   user: User;
   onNavigate: (page: PageId) => void;
-  isAtCampus: boolean;
 }
 
-export default function Home({ user, onNavigate, isAtCampus }: HomeProps) {
+export default function Home({ user, onNavigate }: HomeProps) {
   const [stats, setStats] = useState({ pct: 0, present: 0, total: 0 });
   const [greeting, setGreeting] = useState('');
   const [recentNotices, setRecentNotices] = useState<any[]>([]);
@@ -88,13 +87,7 @@ export default function Home({ user, onNavigate, isAtCampus }: HomeProps) {
         <div className="absolute top-[-50px] right-[-50px] w-48 h-48 rounded-full bg-sf/10 pointer-events-none" />
         <div className="absolute bottom-[-40px] left-[-20px] w-32 h-32 rounded-full bg-wh/5 pointer-events-none" />
         
-        {/* Status Indicator - Top right */}
-        <div className={`absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 border rounded-full shrink-0 shadow-sm z-20 ${isAtCampus ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'}`}>
-          <Star size={8} className={isAtCampus ? 'text-green-400 fill-green-400' : 'text-red-400'} />
-          <span className={`text-[8px] font-black uppercase tracking-widest whitespace-nowrap ${isAtCampus ? 'text-green-400' : 'text-red-400'}`}>
-            {isAtCampus ? 'Active' : 'Inactive'}
-          </span>
-        </div>
+
 
         <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">

@@ -16,7 +16,7 @@ export default function Results() {
   }, []);
 
   const filteredResults = (config.results || []).filter(r => 
-    r.title.toLowerCase().includes(searchTerm.toLowerCase())
+    (r.title || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   ).sort((a, b) => b.publishedAt - a.publishedAt);
 
   return (

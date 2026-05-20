@@ -18,8 +18,8 @@ export default function Faculty() {
   const facultyList = config.faculties || [];
 
   const filteredFaculty = facultyList.filter(f => 
-    f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.subjects.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
+    (f.name || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+    (f.subjects || []).some(s => (s || '').toLowerCase().includes((searchTerm || '').toLowerCase()))
   );
 
   return (

@@ -3,7 +3,7 @@ import { db } from '../lib/firebase';
 import { User, UserStatus } from '../types';
 
 function fbKey(email: string) {
-  return email.toLowerCase()
+  return (email || '').toLowerCase()
     .replace(/\./g, '_DOT_')
     .replace(/@/g, '_AT_')
     .replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -12,7 +12,7 @@ function fbKey(email: string) {
 export const userService = {
   async getUser(email: string): Promise<User | null> {
     try {
-      const key = fbKey(email);
+      const key = fbKey(email || '');
       const snapshot = await get(ref(db, `users/${key}`));
       return snapshot.exists() ? snapshot.val() as User : null;
     } catch (error) {
@@ -23,7 +23,7 @@ export const userService = {
 
   async saveUser(user: User): Promise<void> {
     try {
-      const email = user.email.toLowerCase().trim();
+      const email = (user.email || '').toLowerCase().trim();
       const key = fbKey(email);
       await set(ref(db, `users/${key}`), {
         ...user,
