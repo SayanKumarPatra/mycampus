@@ -12,6 +12,7 @@ import Dashboard from './components/dashboard/Dashboard';
 import AdminPanel from './components/admin/AdminPanel';
 import { userService } from './services/userService';
 import { AppPreloader } from './components/dashboard/Preloaders';
+import PWAInstallBanner from './components/pwa/PWAInstallBanner';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -133,6 +134,7 @@ export default function App() {
           }}
         />
       )}
+      <PWAInstallBanner />
     </div>
   );
 }
