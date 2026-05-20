@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, LogIn, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, ShieldAlert, Terminal, Database, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
 import { User } from '../../types';
 import { userService } from '../../services/userService';
@@ -138,6 +138,66 @@ export default function Login({ onLogin, onSwitchToRegister, onOpenAdmin }: Logi
           </div>
         </div>
       </motion.div>
+
+      {/* Floating PNG Icon & Symbols Preloader Overlay on login (Transparent & Text-free) */}
+      {loading && (
+        <div className="fixed inset-0 bg-transparent flex flex-col items-center justify-center z-50 select-none pointer-events-none">
+          <div className="flex flex-col items-center pointer-events-none">
+            
+            {/* Horizontal array of floating academic symbols */}
+            <div className="flex gap-8 sm:gap-12 items-center justify-center mb-8">
+              {/* Terminal / C++ */}
+              <motion.div
+                animate={{ y: [-10, 10] }}
+                transition={{ duration: 4.5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                className="flex flex-col items-center"
+              >
+                <div className="absolute w-8 h-8 bg-sky-400/10 rounded-full filter blur-md pointer-events-none" />
+                <Terminal size={32} className="text-sky-600 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]" />
+              </motion.div>
+
+              {/* Database / DBMS */}
+              <motion.div
+                animate={{ y: [10, -10] }}
+                transition={{ duration: 4.2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                className="flex flex-col items-center"
+              >
+                <div className="absolute w-8 h-8 bg-emerald-400/10 rounded-full filter blur-md pointer-events-none" />
+                <Database size={32} className="text-emerald-600 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
+              </motion.div>
+
+              {/* Layers / BCA */}
+              <motion.div
+                animate={{ y: [-8, 8] }}
+                transition={{ duration: 4.8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                className="flex flex-col items-center"
+              >
+                <div className="absolute w-8 h-8 bg-amber-400/10 rounded-full filter blur-md pointer-events-none" />
+                <Layers size={32} className="text-amber-600 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]" />
+              </motion.div>
+            </div>
+
+            {/* Central PWA PNG Banner and floating animation */}
+            <motion.div
+              animate={{ y: [-10, 10], scale: [0.99, 1.01, 0.99] }}
+              transition={{
+                duration: 3.6,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }}
+              className="relative py-4 px-6 flex items-center justify-center"
+            >
+              <div className="absolute inset-0 bg-sf/10 rounded-full filter blur-2xl transform scale-110 pointer-events-none" />
+              <div className="flex items-center justify-center select-none relative z-10">
+                <span className="font-rajdhani text-3xl sm:text-4xl font-black text-[#5a0c35] tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">My</span>
+                <span className="font-rajdhani text-3xl sm:text-4xl font-black bg-gradient-to-r from-[#FF9500] to-[#FF5E00] bg-clip-text text-transparent ml-1 tracking-tight drop-shadow-[0_2px_10px_rgba(255,94,0,0.15)]">Campus</span>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

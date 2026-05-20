@@ -7,6 +7,13 @@ import { SUBJECTS } from '../../constants';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+const getLocalDateString = (d: Date = new Date()): string => {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 interface AttendanceProps {
   user: User;
 }
@@ -25,7 +32,7 @@ export default function Attendance({ user }: AttendanceProps) {
       const data = await attendanceService.getAttendance(user.id);
       setAttData(data.records);
       
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getLocalDateString();
       const todayRec = data.records.find(r => r.date === today);
       if (todayRec) {
         const initial: Record<number, 'present' | 'absent' | 'not-marked'> = {};
@@ -33,6 +40,8 @@ export default function Attendance({ user }: AttendanceProps) {
           if (s.status !== 'not-marked') initial[i] = s.status as any;
         });
         setMarkedToday(initial);
+      } else {
+        setMarkedToday({});
       }
     };
 
@@ -63,7 +72,7 @@ export default function Attendance({ user }: AttendanceProps) {
 
   const handleSave = async () => {
     setSaving(true);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getLocalDateString();
     const record: AttendanceRecord = {
       date: today,
       subjects: SUBJECTS.map((s, i) => ({
@@ -196,7 +205,7 @@ export default function Attendance({ user }: AttendanceProps) {
   const weeklyRecords = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate() + i);
-    const dk = d.toISOString().slice(0, 10);
+    const dk = getLocalDateString(d);
     const rec = attData.find(r => r.date === dk);
     let status = 'none';
     if (rec) {
@@ -409,7 +418,7 @@ export default function Attendance({ user }: AttendanceProps) {
                         ${r.status === 'present' ? 'bg-db text-wh border-db' : 
                           r.status === 'absent' ? 'bg-red-50 text-red-600 border-red-200' : 
                           'bg-bg text-lt border-bc'}
-                        ${r.dk === new Date().toISOString().slice(0,10) ? 'ring-2 ring-offset-2 ring-sf' : ''}`}>
+                        ${r.dk === getLocalDateString() ? 'ring-2 ring-offset-2 ring-sf' : ''}`}>
                          {r.date}
                       </div>
                    </div>
@@ -440,7 +449,10 @@ export default function Attendance({ user }: AttendanceProps) {
               <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: 31 }, (_, i) => {
                   const day = i + 1;
-                  const dateStr = `2026-05-${day.toString().padStart(2, '0')}`;
+                  const now = new Date();
+                  const year = now.getFullYear();
+                  const month = String(now.getMonth() + 1).padStart(2, '0');
+                  const dateStr = `${year}-${month}-${day.toString().padStart(2, '0')}`;
                   const rec = attData.find(r => r.date === dateStr);
                   let bgColor = 'bg-bg';
                   if (rec) {

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="campusGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF9500" />
+      <stop offset="100%" stop-color="#FF5E00" />
+    </linearGradient>
+    <style>
+      .my-text {
+        font-family: 'Nunito', 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 950;
+        fill: #4c072b;
+      }
+      .campus-text {
+        font-family: 'Nunito', 'Inter', 'Segoe UI', sans-serif;
+        font-weight: 950;
+        fill: url(#campusGrad);
+      }
+    </style>
+  </defs>
+  
+  <g transform="translate(20, 115)">
+    <text x="0" y="0" class="my-text" font-size="110" letter-spacing="-3">My</text>
+    <text x="145" y="0" class="campus-text" font-size="110" letter-spacing="-2">Campus</text>
+  </g>
+</svg>

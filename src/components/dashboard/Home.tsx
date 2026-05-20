@@ -95,7 +95,7 @@ export default function Home({ user, onNavigate }: HomeProps) {
                 {user.photo ? <img src={user.photo} className="w-full h-full object-cover" /> : getInitials(user.name)}
              </div>
              <div className="min-w-0 flex-1">
-                <span className="text-[10px] text-wh/70 font-medium whitespace-nowrap block">{greeting}</span>
+                <span className="text-xs sm:text-[13px] text-wh font-extrabold tracking-wide block">{greeting}</span>
                 <h2 className="font-rajdhani text-xl font-bold text-wh leading-tight mt-0.5 truncate pr-8 sm:pr-2" title={user.name}>{user.name}</h2>
                 <div className="flex items-center gap-2 mt-0.5 overflow-hidden">
                   <p className="text-[9px] text-wh/60 uppercase tracking-wide font-bold truncate shrink-0">{user.department}</p>

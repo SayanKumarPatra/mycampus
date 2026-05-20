@@ -16,21 +16,21 @@ const preloaderStyle = `
 `;
 
 // ==========================================
-// 1. BRAND NEW STARTUP SPLASH SCREEN PRELOADER (1.8s FOR FLICK PHYSICS & TEXT INFLOW)
+// 1. BRAND NEW STARTUP SPLASH SCREEN PRELOADER (3.8s FOR SUPERSLOW GENTLE GRAVITY MOTION)
 // ==========================================
 export function AppPreloader({ onComplete }: { onComplete: () => void }) {
   const [showText, setShowText] = useState(false);
 
   useEffect(() => {
-    // Exactly at 800ms (when icons start their sharp final plummet), trigger "My Campus" text entrance
+    // Exactly at 1300ms, trigger "My Campus" text entrance
     const textTimer = setTimeout(() => {
       setShowText(true);
-    }, 700);
+    }, 1300);
 
-    // 1.8 seconds complete duration
+    // 3.8 seconds complete duration
     const timer = setTimeout(() => {
       onComplete();
-    }, 1800);
+    }, 3800);
 
     return () => {
       clearTimeout(textTimer);
@@ -38,11 +38,7 @@ export function AppPreloader({ onComplete }: { onComplete: () => void }) {
     };
   }, [onComplete]);
 
-  // DOUBLE BOUNCE / TOSS GRAVITY KEYFRAMES FOR SMALLER SYMBOLS
-  // 1. Shoots up from hidden bottom (100vh) up to high canopy (-35vh)
-  // 2. Plummets back down to lower bounds (25vh)
-  // 3. Shoots back up secondary bounce (-15vh) representing the "double" flick
-  // 4. Finally plummets off the bottom of the screen completely (120vh)
+  // DOUBLE BOUNCE / TOSS GRAVITY KEYFRAMES FOR SMALLER SYMBOLS (Gentler and slower)
   const dynamicGravityVariants = (delay: number) => ({
     hidden: { y: "100vh", opacity: 0, rotate: 0 },
     visible: {
@@ -50,8 +46,8 @@ export function AppPreloader({ onComplete }: { onComplete: () => void }) {
       opacity: [0, 1, 1, 1, 0],
       rotate: [0, 160, 210, 320, 480],
       transition: {
-        duration: 1.8,
-        times: [0, 0.3, 0.5, 0.72, 1],
+        duration: 3.6,
+        times: [0, 0.35, 0.55, 0.75, 1],
         ease: ["easeOut", "easeIn", "easeOut", "easeIn"],
         delay: delay
       }

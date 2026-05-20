@@ -39,6 +39,37 @@ interface DashboardProps {
   onUserUpdate: (updatedUser: User) => void;
 }
 
+const parseTimeToMinutes = (timeStr: string): number | null => {
+  const match = timeStr.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
+  if (!match) return null;
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const ampm = match[3].toUpperCase();
+  
+  if (ampm === 'PM' && hours < 12) {
+    hours += 12;
+  } else if (ampm === 'AM' && hours === 12) {
+    hours = 0;
+  }
+  return hours * 60 + minutes;
+};
+
+const isCurrentTimeInClass = (currentTime: Date, classTimeRange: string): boolean => {
+  const parts = classTimeRange.split(/[-–]|to/i);
+  if (parts.length < 2) return false;
+  const startMin = parseTimeToMinutes(parts[0]);
+  const endMin = parseTimeToMinutes(parts[1]);
+  if (startMin === null || endMin === null) return false;
+  
+  const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+  
+  if (startMin <= endMin) {
+    return currentMin >= startMin && currentMin < endMin;
+  } else {
+    return currentMin >= startMin || currentMin < endMin;
+  }
+};
+
 export type PageId = 'home' | 'attendance' | 'notes' | 'results' | 'notices' | 'routine' | 'faculty' | 'profile';
 
 export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
@@ -93,6 +124,16 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
 
   const sections = ['Main', 'Academic'];
 
+  const getActiveClass = () => {
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDayName = daysOfWeek[currentTime.getDay()];
+    const dayRoutine = (attConfig.routine || []).filter(r => r.day === currentDayName);
+    const active = dayRoutine.find(r => isCurrentTimeInClass(currentTime, r.time));
+    return active || null;
+  };
+
+  const activeClass = getActiveClass();
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Header */}
@@ -139,6 +180,23 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
           <span className="text-[10px] text-wh/70 font-bold uppercase tracking-wider">
             {currentTime.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}
           </span>
+          {activeClass ? (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-wh/20 block" />
+              <span className="flex items-center gap-1.5 text-[9.5px] font-extrabold text-green-400 bg-green-950/40 border border-green-800/40 px-2 py-0.5 rounded-full whitespace-nowrap animate-pulse uppercase tracking-wide">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 block shrink-0" />
+                <span>{activeClass.isBreak ? `Break: ${activeClass.subj}` : `${activeClass.subj} ${activeClass.room ? `[Rm ${activeClass.room}]` : ''}`}</span>
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-1.5 h-1.5 rounded-full bg-wh/20 block" />
+              <span className="flex items-center gap-1.5 text-[9.5px] font-bold text-wh/40 bg-wh/5 border border-wh/10 px-2 py-0.5 rounded-full whitespace-nowrap uppercase tracking-wider">
+                <span className="w-1.2 h-1.2 rounded-full bg-wh/20 block shrink-0" />
+                <span>No Classes Running</span>
+              </span>
+            </>
+          )}
         </div>
       </div>
 
