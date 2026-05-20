@@ -272,6 +272,17 @@ export default function Register({ onRegistered, onSwitchToLogin }: RegisterProp
         <div className="text-center mt-4 text-[13px] text-mt">
           Have account? <button onClick={onSwitchToLogin} className="text-sf font-bold hover:underline">Login Here</button>
         </div>
+
+        <div className="mt-6 pt-5 border-t border-bc text-center">
+          <p className="text-[11px] font-bold text-dt tracking-wide">MyCampus Student Hub</p>
+          <p className="text-[9px] text-lt leading-relaxed italic mt-1.5 px-3">
+            "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
+          </p>
+          <div className="mt-3.5 pt-3 border-t border-dashed border-bc/60">
+            <p className="text-[10px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
+            <p className="text-[9px] text-lt font-mono mt-0.5">CEO & Founder: Sayan Kumar Patra</p>
+          </div>
+        </div>
       </motion.div>
     </AuthLayout>
   );

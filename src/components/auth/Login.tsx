@@ -127,9 +127,16 @@ export default function Login({ onLogin, onSwitchToRegister, onOpenAdmin }: Logi
           <ShieldAlert size={16} />
           Admin Panel — Database Control
         </button>
-        <p className="text-center mt-3 text-[9px] text-lt leading-relaxed italic px-4">
-          “This is an independent student-made platform and is not officially affiliated with EIILM Kolkata.”
-        </p>
+        <div className="mt-6 pt-5 border-t border-bc text-center">
+          <p className="text-[11px] font-bold text-dt tracking-wide">MyCampus Student Hub</p>
+          <p className="text-[9px] text-lt leading-relaxed italic mt-1.5 px-3">
+            "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
+          </p>
+          <div className="mt-3.5 pt-3 border-t border-dashed border-bc/60">
+            <p className="text-[10px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
+            <p className="text-[9px] text-lt font-mono mt-0.5">CEO & Founder: Sayan Kumar Patra</p>
+          </div>
+        </div>
       </motion.div>
     </AuthLayout>
   );

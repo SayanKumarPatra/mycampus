@@ -58,6 +58,21 @@ export const userService = {
     }
   },
 
+  subscribeToUser(email: string, callback: (user: User | null) => void) {
+    const key = fbKey(email);
+    const userRef = ref(db, `users/${key}`);
+    const unsubscribe = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        callback(snapshot.val() as User);
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error("RealtimeDB User Subscription Error:", error);
+    });
+    return unsubscribe;
+  },
+
   subscribeToUsers(callback: (users: User[]) => void) {
     const usersRef = ref(db, 'users');
     const unsubscribe = onValue(usersRef, (snapshot) => {

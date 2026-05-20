@@ -11,11 +11,13 @@ import Pending from './components/auth/Pending';
 import Dashboard from './components/dashboard/Dashboard';
 import AdminPanel from './components/admin/AdminPanel';
 import { userService } from './services/userService';
+import { AppPreloader } from './components/dashboard/Preloaders';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [view, setView] = useState<'login' | 'register' | 'pending' | 'dashboard' | 'admin'>('login');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     const savedSess = sessionStorage.getItem('eiilm_sess');
@@ -44,6 +46,33 @@ export default function App() {
     }
   };
 
+  // Real-time synchronization of the current user's profile and status from Firebase
+  useEffect(() => {
+    if (!user || !user.email) return;
+    
+    const unsubscribe = userService.subscribeToUser(user.email, (freshUser) => {
+      if (freshUser) {
+        setUser(freshUser);
+        sessionStorage.setItem('eiilm_sess', JSON.stringify(freshUser));
+        
+        // Handle view routing based on status in real-time
+        if (freshUser.status === 'approved') {
+          setView('dashboard');
+        } else if (freshUser.status === 'pending') {
+          setView('pending');
+        } else {
+          setView('login');
+          sessionStorage.removeItem('eiilm_sess');
+          setUser(null);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user?.email]);
+
   const handleLogin = (u: User) => {
     setUser(u);
     sessionStorage.setItem('eiilm_sess', JSON.stringify(u));
@@ -56,6 +85,10 @@ export default function App() {
     setView('login');
     sessionStorage.removeItem('eiilm_sess');
   };
+
+  if (isInitialLoading) {
+    return <AppPreloader onComplete={() => setIsInitialLoading(false)} />;
+  }
 
   if (isAdminOpen) {
     return <AdminPanel onClose={() => setIsAdminOpen(false)} />;
@@ -91,7 +124,14 @@ export default function App() {
         />
       )}
       {view === 'dashboard' && user && (
-        <Dashboard user={user} onLogout={handleLogout} />
+        <Dashboard 
+          user={user} 
+          onLogout={handleLogout} 
+          onUserUpdate={(updatedUser) => {
+            setUser(updatedUser);
+            sessionStorage.setItem('eiilm_sess', JSON.stringify(updatedUser));
+          }}
+        />
       )}
     </div>
   );

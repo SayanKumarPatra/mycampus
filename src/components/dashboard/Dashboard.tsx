@@ -17,7 +17,8 @@ import {
   MapPin,
   LogIn,
   LogOut as LogOutIcon,
-  CreditCard
+  CreditCard,
+  User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, AttendanceConfig } from '../../types';
@@ -30,19 +31,26 @@ import Results from './Results';
 import Notices from './Notices';
 import Routine from './Routine';
 import Faculty from './Faculty';
+import Profile from './Profile';
 
 interface DashboardProps {
   user: User;
   onLogout: () => void;
+  onUserUpdate: (updatedUser: User) => void;
 }
 
-export type PageId = 'home' | 'attendance' | 'notes' | 'results' | 'notices' | 'routine' | 'faculty';
+export type PageId = 'home' | 'attendance' | 'notes' | 'results' | 'notices' | 'routine' | 'faculty' | 'profile';
 
-export default function Dashboard({ user, onLogout }: DashboardProps) {
+export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
   const [activePage, setActivePage] = useState<PageId>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [attConfig, setAttConfig] = useState<AttendanceConfig>({ subjects: [], materials: [] });
+
+  const triggerPageChange = (page: PageId) => {
+    if (page === activePage) return;
+    setActivePage(page);
+  };
 
   useEffect(() => {
     const unsub = attendanceService.subscribeToGlobalConfig(setAttConfig);
@@ -78,6 +86,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     },
     { id: 'results', label: 'Exam Results', icon: Award, section: 'Main' },
     { id: 'faculty', label: 'Faculty', icon: Users, section: 'Main' },
+    { id: 'profile', label: 'My Profile', icon: UserIcon, section: 'Main' },
     { id: 'notices', label: 'Notices', icon: Megaphone, section: 'Academic' },
     { id: 'routine', label: 'Routine', icon: Calendar, section: 'Academic' },
   ];
@@ -136,12 +145,15 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Desktop */}
         <aside className="hidden lg:flex flex-col w-[240px] bg-wh border-r border-bc shrink-0">
-          <div className="p-4 bg-gradient-to-br from-db to-db2 border-b border-bc shadow-sm">
+          <div 
+            onClick={() => triggerPageChange('profile')}
+            className="p-4 bg-gradient-to-br from-db to-db2 border-b border-bc shadow-sm cursor-pointer hover:from-db2 hover:to-db3 transition-all duration-300 group"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full border-2 border-wh/40 bg-sf overflow-hidden flex items-center justify-center font-rajdhani text-lg font-bold text-db shrink-0">
+              <div className="w-12 h-12 rounded-full border-2 border-wh/40 bg-sf overflow-hidden flex items-center justify-center font-rajdhani text-lg font-bold text-db shrink-0 group-hover:scale-105 transition-transform">
                 {user.photo ? <img src={user.photo} className="w-full h-full object-cover" /> : getInitials(user.name)}
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h2 className="text-sm font-bold text-wh truncate">{user.name}</h2>
                 <p className="text-[10px] text-wh/60 truncate">Roll: {user.roll}</p>
                 <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 bg-sf rounded-full w-fit">
@@ -160,7 +172,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                   <button
                     key={p.id}
                     onClick={() => {
-                      setActivePage(p.id as PageId);
+                      triggerPageChange(p.id as PageId);
                       setIsSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all border-l-3
@@ -191,10 +203,14 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
           </nav>
           
           <footer className="p-4 border-t border-bc text-center">
-             <p className="text-[9px] text-lt uppercase font-bold tracking-widest mb-1.5">MyCampus Portal</p>
-             <p className="text-[8px] text-lt leading-relaxed italic px-2">
-               “This is an independent student-made platform and is not officially affiliated with EIILM Kolkata.”
+             <p className="text-[10px] font-bold text-dt uppercase tracking-wide">MyCampus Student Hub</p>
+             <p className="text-[8px] text-lt leading-relaxed italic mt-1 px-1">
+               "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
              </p>
+             <div className="mt-2.5 pt-2 border-t border-dashed border-bc/60">
+               <p className="text-[9px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
+               <p className="text-[8px] text-lt font-mono">CEO & Founder: Sayan Kumar Patra</p>
+             </div>
           </footer>
         </aside>
 
@@ -216,15 +232,24 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 className="fixed top-0 left-0 bottom-0 w-[280px] bg-wh z-50 lg:hidden flex flex-col shadow-2xl"
               >
-                <div className="p-5 pt-8 bg-gradient-to-br from-db to-db2 relative">
+                <div 
+                  onClick={() => {
+                    triggerPageChange('profile');
+                    setIsSidebarOpen(false);
+                  }}
+                  className="p-5 pt-8 bg-gradient-to-br from-db to-db2 relative cursor-pointer hover:from-db2 hover:to-db3 transition-all duration-300 group"
+                >
                   <button 
-                    onClick={() => setIsSidebarOpen(false)}
-                    className="absolute top-4 right-4 w-7 h-7 bg-wh/10 text-wh rounded-md flex items-center justify-center"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSidebarOpen(false);
+                    }}
+                    className="absolute top-4 right-4 w-7 h-7 bg-wh/10 text-wh rounded-md flex items-center justify-center z-10"
                   >
                     <X size={18} />
                   </button>
                   <div className="flex items-center gap-4 mt-2">
-                    <div className="w-14 h-14 rounded-full border-2 border-wh/40 bg-sf overflow-hidden flex items-center justify-center font-rajdhani text-xl font-bold text-db shrink-0">
+                    <div className="w-14 h-14 rounded-full border-2 border-wh/40 bg-sf overflow-hidden flex items-center justify-center font-rajdhani text-xl font-bold text-db shrink-0 group-hover:scale-105 transition-transform">
                       {user.photo ? <img src={user.photo} className="w-full h-full object-cover" /> : getInitials(user.name)}
                     </div>
                     <div>
@@ -245,7 +270,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                         <button
                           key={p.id}
                           onClick={() => {
-                            setActivePage(p.id as PageId);
+                            triggerPageChange(p.id as PageId);
                             setIsSidebarOpen(false);
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all border-l-3
@@ -275,10 +300,14 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                   </div>
                 </nav>
                 <footer className="p-5 border-t border-bc text-center">
-                  <p className="text-[10px] text-lt uppercase font-bold tracking-widest mb-2">MyCampus Student Hub</p>
-                  <p className="text-[9px] text-lt leading-relaxed italic px-2">
-                    “This is an independent student-made platform and is not officially affiliated with EIILM Kolkata.”
+                  <p className="text-[10px] font-bold text-dt uppercase tracking-wide">MyCampus Student Hub</p>
+                  <p className="text-[9px] text-lt leading-relaxed italic mt-1 px-1">
+                    "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
                   </p>
+                  <div className="mt-2.5 pt-2 border-t border-dashed border-bc/60">
+                    <p className="text-[9px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
+                    <p className="text-[8px] text-lt font-mono">CEO & Founder: Sayan Kumar Patra</p>
+                  </div>
                 </footer>
               </motion.aside>
             </>
@@ -296,13 +325,14 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                {activePage === 'home' && <Home user={user} onNavigate={setActivePage} />}
+                {activePage === 'home' && <Home user={user} onNavigate={triggerPageChange} />}
                 {activePage === 'attendance' && <Attendance user={user} />}
                 {activePage === 'notes' && <Notes />}
                 {activePage === 'results' && <Results />}
                 {activePage === 'notices' && <Notices />}
                 {activePage === 'routine' && <Routine />}
                 {activePage === 'faculty' && <Faculty />}
+                {activePage === 'profile' && <Profile user={user} onUserUpdate={onUserUpdate} />}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -323,7 +353,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
           return (
             <button
               key={item.id}
-              onClick={() => setActivePage(item.id as PageId)}
+              onClick={() => triggerPageChange(item.id as PageId)}
               className="flex flex-col items-center justify-center flex-1 h-full relative transition-all active:scale-95 group focus:outline-none"
             >
               <div className="relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 z-10">
