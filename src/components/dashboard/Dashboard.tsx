@@ -18,7 +18,8 @@ import {
   LogIn,
   LogOut as LogOutIcon,
   CreditCard,
-  User as UserIcon
+  User as UserIcon,
+  MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, AttendanceConfig } from '../../types';
@@ -32,6 +33,7 @@ import Notices from './Notices';
 import Routine from './Routine';
 import Faculty from './Faculty';
 import Profile from './Profile';
+import SupportChatbot from './SupportChatbot';
 
 interface DashboardProps {
   user: User;
@@ -77,6 +79,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [attConfig, setAttConfig] = useState<AttendanceConfig>({ subjects: [], materials: [] });
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const triggerPageChange = (page: PageId) => {
     if (page === activePage) return;
@@ -159,12 +162,16 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
         </div>
         
         <div className="flex items-center gap-3">
-           <button className="w-9 h-9 bg-wh/10 text-wh rounded-rs flex items-center justify-center relative">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-sf rounded-full border border-db" />
+           <button 
+             onClick={() => setIsChatbotOpen(true)}
+             className="w-9 h-9 bg-green-500/10 text-green-400 border border-green-500/20 rounded-rs flex items-center justify-center relative hover:bg-green-500/20 transition-all cursor-pointer"
+             title="Need Help? Open Support Chatbot"
+           >
+              <MessageCircle size={18} className="animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-400 rounded-full border border-db" />
            </button>
            <button onClick={onLogout} className="w-9 h-9 bg-wh/10 text-wh rounded-rs flex items-center justify-center hover:bg-red-500/20 hover:text-red-400 transition-colors">
-              <LogOutIcon size={20} />
+              <LogOutIcon size={18} />
            </button>
         </div>
       </header>
@@ -455,6 +462,9 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
           </span>
         </button>
       </div>  </div>
+      
+      {/* Support Chatbot Modal Panel */}
+      <SupportChatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} user={user} />
     </div>
   );
 }

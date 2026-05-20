@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="152" height="152">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7a1642" />
+      <stop offset="50%" stop-color="#5d0e31" />
+      <stop offset="100%" stop-color="#35081b" />
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9d4d" />
+      <stop offset="100%" stop-color="#ff6a13" />
+    </linearGradient>
+    <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#fdfaf9" />
+    </linearGradient>
+    <filter id="dropShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <rect x="24" y="24" width="464" height="464" rx="104" fill="url(#bgGrad)" filter="url(#dropShadow)" />
+  <path d="M 24,124 Q 150,75 300,135 T 488,55 L 488,24 L 24,24 Z" fill="#FFFFFF" opacity="0.05" />
+
+  <g filter="url(#dropShadow)" transform="translate(0, 15)">
+    <path d="M 120,380 Q 188,382 256,350 Q 324,382 392,380 L 375,280 Q 315,282 256,260 Q 197,282 137,280 Z" fill="#35081b" opacity="0.4" />
+    <path d="M 130,370 Q 193,372 250,344 L 250,264 Q 193,284 130,280 Z" fill="url(#whiteGrad)" />
+    <path d="M 382,370 Q 319,372 262,344 L 262,264 Q 319,284 382,280 Z" fill="url(#whiteGrad)" />
+    <line x1="256" y1="264" x2="256" y2="344" stroke="#e8dee2" stroke-width="3" stroke-linecap="round" />
+
+    <path d="M 152,298 L 152,360 L 182,360 L 182,310 L 220,345 L 256,310 L 292,345 L 330,310 L 330,360 L 360,360 L 360,298 L 310,315 L 256,275 L 202,315 Z" fill="url(#orangeGrad)" />
+
+    <polygon points="256,105 435,180 256,255 77,180" fill="url(#whiteGrad)" />
+    <polygon points="256,118 415,184 256,250 97,184" fill="#e8dee2" opacity="0.95" />
+    <ellipse cx="256" cy="180" rx="12" ry="8" fill="url(#orangeGrad)" />
+    <path d="M 256,183 Q 192,192 165,225 Q 155,240 155,255" fill="none" stroke="url(#orangeGrad)" stroke-width="6" stroke-linecap="round" />
+    <polygon points="145,252 165,252 160,285 150,285" fill="url(#orangeGrad)" />
+  </g>
+
+  <rect x="36" y="36" width="440" height="440" rx="92" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.10" />
+  <rect x="44" y="44" width="424" height="424" rx="84" fill="none" stroke="url(#orangeGrad)" stroke-width="2" opacity="0.25" />
+  <circle cx="256" cy="36" r="4.5" fill="#ff9d4d" />
+  <circle cx="256" cy="476" r="4.5" fill="#ff9d4d" />
+  <circle cx="36" cy="256" r="4.5" fill="#ff9d4d" />
+  <circle cx="476" cy="256" r="4.5" fill="#ff9d4d" />
+</svg>

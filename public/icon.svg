@@ -1,84 +1,111 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
+    <!-- Deep Maroon Background Gradient (matching website's premium aesthetic) -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1" />
-      <stop offset="100%" stop-color="#4F46E5" />
+      <stop offset="0%" stop-color="#7a1642" />    <!-- db2 -->
+      <stop offset="50%" stop-color="#5d0e31" />   <!-- db -->
+      <stop offset="100%" stop-color="#35081b" />  <!-- dt -->
     </linearGradient>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBBF24" />
-      <stop offset="100%" stop-color="#F59E0B" />
+    
+    <!-- Bright Sunset Orange Gradient -->
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9d4d" />    <!-- sf2 -->
+      <stop offset="100%" stop-color="#ff6a13" />   <!-- sf -->
     </linearGradient>
+    
+    <!-- Sophisticated White Gradient -->
     <linearGradient id="whiteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#F3F4F6" />
+      <stop offset="100%" stop-color="#fdfaf9" />   <!-- bg -->
     </linearGradient>
-    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3" />
+    
+    <filter id="dropShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45" />
     </filter>
   </defs>
 
-  <!-- High-end rounded icon canvas background -->
+  <!-- Premium rounded icon canvas background -->
   <rect x="24" y="24" width="464" height="464" rx="104" fill="url(#bgGrad)" filter="url(#dropShadow)" />
   
-  <!-- Subtle tech network lattice on background -->
-  <g opacity="0.08">
-    <circle cx="100" cy="100" r="40" stroke="#FFFFFF" stroke-width="2" fill="none" />
-    <circle cx="412" cy="100" r="60" stroke="#FFFFFF" stroke-width="2" fill="none" />
-    <circle cx="100" cy="412" r="80" stroke="#FFFFFF" stroke-width="2" fill="none" />
-    <circle cx="412" cy="412" r="50" stroke="#FFFFFF" stroke-width="2" fill="none" />
-    <line x1="100" y1="100" x2="412" y2="100" stroke="#FFFFFF" stroke-width="2" />
-    <line x1="412" y1="100" x2="412" y2="412" stroke="#FFFFFF" stroke-width="2" />
-    <line x1="100" y1="100" x2="100" y2="412" stroke="#FFFFFF" stroke-width="2" />
-    <line x1="100" y1="412" x2="412" y2="412" stroke="#FFFFFF" stroke-width="2" />
+  <!-- Subtle decorative tech/academic rings on background -->
+  <g opacity="0.05">
+    <circle cx="256" cy="256" r="180" stroke="#FFFFFF" stroke-width="2" fill="none" />
+    <circle cx="256" cy="256" r="140" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-dasharray="10, 5" />
+    <circle cx="256" cy="256" r="210" stroke="#FFFFFF" stroke-width="1" fill="none" />
   </g>
 
-  <!-- Elegant Inner Gloss Shimmer overlay -->
-  <path d="M 24,124 Q 150,80 300,140 T 488,60 L 488,24 L 24,24 Z" fill="#FFFFFF" opacity="0.06" />
+  <!-- Elegant Inner Gloss Arc/Shimmer -->
+  <path d="M 24,124 Q 150,75 300,135 T 488,55 L 488,24 L 24,24 Z" fill="#FFFFFF" opacity="0.05" />
 
-  <!-- Academic Mortarboard Cap + Letter M Integrated Graphic -->
-  <g filter="url(#dropShadow)" transform="translate(0, 10)">
-    <!-- Top Diamond of Cap -->
-    <polygon points="256,120 420,190 256,260 92,190" fill="url(#whiteGrad)" />
-    <!-- Cap Under Layer (Thickness) -->
-    <polygon points="256,132 400,194 256,256 112,194" fill="#E5E7EB" opacity="0.9" />
-
-    <!-- Tassel Button on top -->
-    <ellipse cx="256" cy="190" rx="10" ry="6" fill="url(#goldGrad)" />
+  <!-- Integrated Cap + Book + M Artwork Group -->
+  <g filter="url(#dropShadow)" transform="translate(0, 15)">
     
-    <!-- Tassel Cord and Tassel hanging down -->
-    <path d="M 256,193 Q 200,200 176,236 Q 166,250 166,264" fill="none" stroke="url(#goldGrad)" stroke-width="5" stroke-linecap="round" />
-    <rect x="156" y="260" width="20" height="25" rx="4" fill="url(#goldGrad)" />
-    
-    <!-- Cap Base (Skull Cap part) shaped like an abstract 'M' structure -->
-    <path d="M 160,240 
-             L 160,330 
-             Q 160,360 190,360 
-             L 210,360 
-             Q 230,360 240,340 
-             L 256,310 
-             L 272,340 
-             Q 282,360 302,360 
-             L 322,360 
-             Q 352,360 352,330 
-             L 352,240 
-             L 312,247 
-             L 312,320 
-             Q 312,328 304,328 
-             L 282,328 
-             L 256,276 
-             L 230,328 
-             L 208,328 
-             Q 200,328 200,320 
-             L 200,247 Z" 
+    <!-- 1. Open Book Concept (Under the cap, forming the base of the M) -->
+    <!-- Represents the open pages of knowledge -->
+    <path d="M 120,380 
+             Q 188,382 256,350 
+             Q 324,382 392,380 
+             L 375,280 
+             Q 315,282 256,260 
+             Q 197,282 137,280 Z" 
+          fill="#35081b" opacity="0.4" />
+          
+    <!-- Left Page of the Book -->
+    <path d="M 130,370 
+             Q 193,372 250,344 
+             L 250,264 
+             Q 193,284 130,280 Z" 
           fill="url(#whiteGrad)" />
+          
+    <!-- Right Page of the Book -->
+    <path d="M 382,370 
+             Q 319,372 262,344 
+             L 262,264 
+             Q 319,284 382,280 Z" 
+          fill="url(#whiteGrad)" />
+          
+    <!-- Open Book Spine/Accent Shadow -->
+    <line x1="256" y1="264" x2="256" y2="344" stroke="#e8dee2" stroke-width="3" stroke-linecap="round" />
+
+    <!-- 2. Integrated Academic "M" Structure (Fuses book pages with letter M) -->
+    <path d="M 152,298 
+             L 152,360 
+             L 182,360 
+             L 182,310 
+             L 220,345 
+             L 256,310 
+             L 292,345 
+             L 330,310 
+             L 330,360 
+             L 360,360 
+             L 360,298
+             L 310,315
+             L 256,275
+             L 202,315 Z" 
+          fill="url(#orangeGrad)" />
+
+    <!-- 3. Classic Graduation Mortarboard Cap (Hovering proudly on top of the M & Book) -->
+    <!-- Main Cap Diamond -->
+    <polygon points="256,105 435,180 256,255 77,180" fill="url(#whiteGrad)" />
+    <!-- Bottom Thickness / Bevel to give dimensional weight -->
+    <polygon points="256,118 415,184 256,250 97,184" fill="#e8dee2" opacity="0.95" />
+    
+    <!-- Top Cap Button -->
+    <ellipse cx="256" cy="180" rx="12" ry="8" fill="url(#orangeGrad)" />
+    
+    <!-- Premium Hanging Tassel with Sunset Orange gradient -->
+    <path d="M 256,183 Q 192,192 165,225 Q 155,240 155,255" fill="none" stroke="url(#orangeGrad)" stroke-width="6" stroke-linecap="round" />
+    <!-- Tassel Fridge / Hanging Fringe -->
+    <polygon points="145,252 165,252 160,285 150,285" fill="url(#orangeGrad)" />
   </g>
 
-  <!-- Glowing Premium Badge Core Ring -->
-  <rect x="36" y="36" width="440" height="440" rx="92" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.12" />
+  <!-- Double Outer Glowing Boundary Accent -->
+  <rect x="36" y="36" width="440" height="440" rx="92" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.10" />
+  <rect x="44" y="44" width="424" height="424" rx="84" fill="none" stroke="url(#orangeGrad)" stroke-width="2" opacity="0.25" />
   
-  <!-- Outer glowing accent dots -->
-  <circle cx="256" cy="36" r="4" fill="#FBBF24" />
-  <circle cx="256" cy="476" r="4" fill="#FBBF24" />
-  <circle cx="36" cy="256" r="4" fill="#FBBF24" />
-  <circle cx="476" cy="256" r="4" fill="#FBBF24" />
+  <!-- Symmetric Radiant Accent Points -->
+  <circle cx="256" cy="36" r="4.5" fill="#ff9d4d" />
+  <circle cx="256" cy="476" r="4.5" fill="#ff9d4d" />
+  <circle cx="36" cy="256" r="4.5" fill="#ff9d4d" />
+  <circle cx="476" cy="256" r="4.5" fill="#ff9d4d" />
 </svg>
