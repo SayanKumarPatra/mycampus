@@ -89,6 +89,20 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
   };
 
   useEffect(() => {
+    // Handle home screen context menu shortcuts
+    const params = new URLSearchParams(window.location.search);
+    const shortcut = params.get('shortcut');
+    if (shortcut) {
+      const pageId = shortcut.toLowerCase() as PageId;
+      const validPages: PageId[] = ['home', 'attendance', 'notes', 'results', 'notices', 'routine', 'faculty', 'profile'];
+      if (validPages.includes(pageId)) {
+        setActivePage(pageId);
+        // Prune the query param to keep the url neat and avoid resetting active option on subsequent triggers
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+
     const unsub = attendanceService.subscribeToGlobalConfig(setAttConfig);
     
     const timer = setInterval(() => {

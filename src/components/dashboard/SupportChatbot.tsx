@@ -66,9 +66,100 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
+  // Direct client-side API call to Gemini (no backend required)
+  const executeClientDirectQuery = async (updatedMessages: Message[], apiKeyToUse: string): Promise<boolean> => {
+    try {
+      // 1. Map messages to standard API structures
+      const slicedMessages = updatedMessages.slice(-15);
+      const contents = slicedMessages.map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+
+      // 2. Build contextual system instruction matching server.ts exactly
+      const systemInstructionText = `You are "MyCampus Assistant Bot" - a highly intelligent, premium, friendly student support chatbot virtual assistant. You represent the "MyCampus Student Portal"/MyCampus Hub.
+
+BACKGROUND & DEVELOPER DETAILS:
+- Developed and designed proudly by "HabaJaba Tech" (Based in West Bengal, India).
+- CEO & Founder of HabaJaba Tech: Sayan Kumar Patra. Sayan is the primary developer of this beautiful portal.
+- Contact / Support Line: Sayan Kumar Patra (Phone/WhatsApp: +91 8145775413).
+- If the user asks for help, wants to report issues, correct database, or register complex requests, tell them Sayan is directly available on WhatsApp at +91 8145775413.
+
+CURRENT STUDENT CONTEXT:
+- Name: ${user.name || 'Student'}
+- Roll Number: ${user.roll || 'Unknown'}
+- Email: ${user.email || 'Unknown'}
+- Status: Active Student Portal Session.
+
+PORTAL DYNAMIC CONTENT (LIVE DATA FROM DATABASE):
+1. Class Routine Scheduler:
+${JSON.stringify(config?.routine || [], null, 2)}
+
+2. Faculty Members Directory:
+${JSON.stringify(config?.faculties || [], null, 2)}
+
+3. Latest Portal Notices / Announcements:
+${JSON.stringify(config?.notices || [], null, 2)}
+
+4. Dynamic Student Exam Results:
+${JSON.stringify(config?.results || [], null, 2)}
+
+5. List of Core Academic Subjects:
+Data Structure using C (DSC-2), Business Communication (MIN-2), Financial Institution & Services (MDC-2), Introduction to Database (SEC-2), Understanding India-II (VAC-2), English (AEC-2), Advance Excel (AE-1), Mathematics (MATH-1), Web Technology (WT-1), Mentor Session (MENT-1).
+
+PWA MAIN INSTALLATION GUIDELINE:
+- This is a progressive web app (PWA) compiled to fit both mobile and desktop perfectly.
+- To Download/Install: Click the yellow Google Play button next to Chat icon.
+
+COMMUNICATION & LANGUAGE RULES:
+- If the user asks in Bengali (Bangla) or Banglish, answer them beautifully, politely, and warmly in Bengali/Banglish. If query is in English, reply in crisp English.
+- Be helpful, cheerful, and proud of MyCampus Hub, Sayan Kumar Patra, and HabaJaba Tech!`;
+
+      // 3. Request Google's Gemini REST API directly
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKeyToUse}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: contents,
+          systemInstruction: {
+            parts: [{ text: systemInstructionText }]
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Direct API response error status: ${response.status}`);
+      }
+
+      const resJson = await response.json();
+      const replyText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (replyText) {
+        setMessages(prev => [...prev, {
+          sender: 'bot',
+          text: replyText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isCustom: true
+        }]);
+        return true;
+      }
+    } catch (err) {
+      console.error('[PWA Direct Gemini Query Catch]:', err);
+    }
+    return false;
+  };
+
   const queryChatbotAPI = async (updatedMessages: Message[]) => {
     setIsTyping(true);
+
+    // Dynamic keys priority: 1. Master Key set by Admin in DB, 2. Environmental key
+    const adminMasterKey = config?.geminiApiKey || '';
+    const clientKey = adminMasterKey || ((import.meta as any).env?.VITE_GEMINI_API_KEY as string) || '';
+
     try {
+      // 1. Attempt Server route query
       const response = await fetch('/api/chatbot', {
         method: 'POST',
         headers: {
@@ -85,23 +176,41 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Chatbot response not OK');
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(prev => [...prev, {
+          sender: 'bot',
+          text: data.reply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isCustom: true
+        }]);
+        setIsTyping(false);
+        return;
+      } else {
+        throw new Error('Server returned error status, fallback needed');
+      }
+    } catch (err) {
+      console.warn('[Server Chatbot is offline / static environment. Swapping to local client direct fallback engine]');
+      
+      // 2. If server API failed (e.g. they copied code to purely static web hosting like GitHub, Netlify or static Vercel), execute direct client path
+      if (clientKey) {
+        const directSuccess = await executeClientDirectQuery(updatedMessages, clientKey);
+        if (directSuccess) {
+          setIsTyping(false);
+          return;
+        }
       }
 
-      const data = await response.json();
+      // 3. Ultimate Fallback: Direct instructions for Admin to inject master key
       setMessages(prev => [...prev, {
         sender: 'bot',
-        text: data.reply,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isCustom: true
-      }]);
-    } catch (err) {
-      console.error('[Chatbot Query Error]:', err);
-      // Fallback
-      setMessages(prev => [...prev, {
-        sender: 'bot',
-        text: `দুঃখিত! এই মুহূর্তে আমার চ্যাটবট ইঞ্জিন ডাউন আছে। সরাসরি ডেভেলপার সায়নের সাথে হোয়াটস্যাপে যোগাযোগ করতে পারো।`,
+        text: `নমস্কার ${user.name}! 👋 
+
+বর্তমানে এই অ্যাপ্লিকেশনটিতে কোনো সচল Google Gemini API Key কনফিগার করা নেই। 
+
+**চ্যাটবটটি সচল করার সহজ উপায়:**
+১. আপনি যদি এডমিন হন, ওপরে ডানদিকের **Admin Panel > Chatbot (AI)** ট্যাবে গিয়ে আপনার ওয়ান-টাইম **Google Gemini API Key** সেট করুন। এর ফলে সমস্ত শিক্ষার্থীদের জন্য এটি স্বয়ংক্রিয়ভাবে চালু হয়ে যাবে!
+২. অথবা, যেকোনো সহায়তার জন্য সরাসরি আমাদের প্রধান ডেভেলপার **সায়ন কুমার পাত্র (Sayan Kumar Patra)** এর সাথে WhatsApp-এ যোগাযোগ করতে পারেন: **+91 8145775413**।`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isCustom: true
       }]);
@@ -170,20 +279,24 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
                   <h3 className="font-rajdhani text-[16px] font-black text-wh tracking-wider uppercase leading-tight">MyCampus Support</h3>
                   <div className="flex items-center gap-1 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                    <p className="text-[10px] text-green-400 font-extrabold tracking-widest uppercase">HabaJaba Chatbot</p>
+                    <p className="text-[10px] text-green-400 font-extrabold tracking-widest uppercase">
+                      {config?.geminiApiKey ? 'AI Core Active' : 'HabaJaba Chatbot'}
+                    </p>
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-wh/10 text-wh hover:bg-wh/20 flex items-center justify-center transition-all cursor-pointer"
-                id="close-chatbot-btn"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button 
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-wh/10 text-wh hover:bg-wh/20 flex items-center justify-center transition-all cursor-pointer"
+                  id="close-chatbot-btn"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
-            {/* Messaging Body */}
+            {/* Messaging interface */}
             <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-bg/50 no-scrollbar">
               {messages.map((m, idx) => (
                 <div 
@@ -300,3 +413,4 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
     </AnimatePresence>
   );
 }
+

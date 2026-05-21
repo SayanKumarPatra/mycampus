@@ -47,20 +47,33 @@ app.post('/api/chatbot', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or missing messages array' });
   }
 
-  // Check if Gemini Client is initialized successfully
-  const ai = getGeminiClient();
+  // Check if Gemini Client is initialized successfully (env key first, then DB master key)
+  let ai = getGeminiClient();
+  const dbApiKey = portalConfig?.geminiApiKey;
+  if (!ai && dbApiKey && dbApiKey.trim() !== '') {
+    try {
+      ai = new GoogleGenAI({
+        apiKey: dbApiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
+    } catch (err) {
+      console.error("[MyCampus Server] Dynamic DB Key Init Error:", err);
+    }
+  }
+
   if (!ai) {
     return res.json({
       reply: `নমস্কার ${userContext?.name || 'শিক্ষার্থী'}! 👋 আমি MyCampus AI অ্যাসিস্ট্যান্ট। 
 
-আপনার পোর্টালে চ্যাটবটটি সচল করতে **GEMINI_API_KEY** যোগ করা প্রয়োজন। 
+বর্তমানে এই অ্যাপ্লিকেশনে কোনো সচল Google Gemini API Key কনফিগার করা নেই। 
 
-**কিভাবে আপনার API Key যোগ করবেন:**
-১. গুগল এআই স্টুডিও-র (Google AI Studio) ডানদিকের কোণায় **Settings** (গিয়ার আইকন) থেকে **Secrets** অপশনে যান।
-২. সেখানে **GEMINI_API_KEY** নামে একটি নতুন সিক্রেট যোগ করুন এবং আপনার জেমিনি এপিআই কী দিন।
-
-**পোর্টালে কোনো সাহায্য প্রয়োজন হলে:**
-আপনি সরাসরি আমাদের প্রধান ডেভেলপার **সায়ন কুমার পাত্র (Sayan Kumar Patra)** এর সাথে WhatsApp-এ যোগাযোগ করতে পারেন: **+91 8145775413**।`
+**চ্যাটবটটি সচল করার উপায়:**
+১. আপনি যদি এডমিন হন, ওপরে ডানদিকের **Admin Panel > Chatbot (AI)** ট্যাবে গিয়ে আপনার ওয়ান-টাইম **Google Gemini API Key** সেট করুন। এর ফলে সমস্ত শিক্ষার্থীদের জন্য এটি স্বয়ংক্রিয়ভাবে চালু হয়ে যাবে!
+২. অথবা, আপনি আমাদের প্রধান ডেভেলপার **সায়ন কুমার পাত্র (Sayan Kumar Patra)** এর সাথে WhatsApp-এ সরাসরি যোগাযোগ করতে পারেন: **+91 8145775413**।`
     });
   }
 

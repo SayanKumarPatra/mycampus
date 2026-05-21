@@ -88,4 +88,5 @@ export interface AttendanceConfig {
   notices: Notice[];
   routine: RoutineItem[];
   faculties: FacultyMember[];
+  geminiApiKey?: string;
 }

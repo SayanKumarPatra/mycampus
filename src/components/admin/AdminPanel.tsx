@@ -18,7 +18,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty' | 'chatbot'>('pending');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [updateMsg, setUpdateMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -367,7 +367,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
           </div>
 
           <div className="bg-bg/30 px-3 py-1.5 border-b border-bc">
-            <span className="text-[9px] font-black text-lt uppercase tracking-widest">Academic Control</span>
+            <span className="text-[9px] font-black text-lt uppercase tracking-widest">Academic & AI Control</span>
           </div>
           <div className="flex overflow-x-auto no-scrollbar">
             {[
@@ -376,7 +376,8 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
               { id: 'results', label: 'Results', icon: Award },
               { id: 'notices', label: 'Notices', icon: Megaphone },
               { id: 'routine', label: 'Routine', icon: Calendar },
-              { id: 'faculty', label: 'Faculty', icon: GraduationCap }
+              { id: 'faculty', label: 'Faculty', icon: GraduationCap },
+              { id: 'chatbot', label: 'Chatbot (AI)', icon: ShieldCheck }
             ].map((t) => (
               <button
                 key={t.id}
@@ -896,6 +897,45 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                             <p className="text-xs text-mt font-bold">Faculty list is empty. Add profiles to show to students.</p>
                          </div>
                        )}
+                    </div>
+                  </motion.div>
+                ) : activeTab === 'chatbot' ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-wh border border-bc rounded-rm p-6 shadow-ss space-y-6"
+                  >
+                    <div className="flex items-center gap-2">
+                       <ShieldCheck size={18} className="text-db" />
+                       <h3 className="text-sm font-bold text-dt">Support Chatbot AI Config</h3>
+                    </div>
+                    
+                    <p className="text-[11px] text-mt leading-relaxed bg-bg p-3 rounded-rs border border-bc">
+                      এখানে প্রোভাইড করা <strong>Google Gemini API Key</strong> টি সমস্ত স্টুডেন্টদের জন্য গ্লোবাল এপিআই কী হিসেবে কাজ করবে। ফলে কোনো স্টুডেন্টকে আলাদা করে লোকাল সেটিংস বা কি দিতে হবে না।
+                    </p>
+
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-dt uppercase tracking-widest block font-bold">
+                          Master Gemini API Key
+                        </label>
+                        <input 
+                          type="password"
+                          className="inp h-10 px-3 font-mono"
+                          placeholder="AIzaSy... (Enter Gemini API Key)"
+                          value={attConfig.geminiApiKey || ''}
+                          onChange={async (e) => {
+                            const newConfig = { ...attConfig, geminiApiKey: e.target.value.trim() };
+                            setAttConfig(newConfig);
+                            await attendanceService.saveGlobalConfig(newConfig);
+                            setUpdateMsg('Master Gemini API Key updated ✓');
+                            setTimeout(() => setUpdateMsg(''), 2000);
+                          }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-lt leading-normal font-semibold">
+                        * এই কী টি রিয়েলটাইমে ফায়ারবেস ডেটাবেসে সংরক্ষিত হবে এবং এটি সুরক্ষিত উপায়ে সবার চ্যাটবটে কাজ করবে।
+                      </p>
                     </div>
                   </motion.div>
                 ) : filteredUsers.length === 0 ? (
