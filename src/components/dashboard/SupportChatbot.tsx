@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Send, MessageCircle, HelpCircle, ArrowUpRight, PhoneCall, Check, Sparkles } from 'lucide-react';
-import { User } from '../../types';
+import { X, Send, MessageCircle, HelpCircle, ArrowUpRight, PhoneCall, Sparkles } from 'lucide-react';
+import { User, AttendanceConfig } from '../../types';
+import { attendanceService } from '../../services/attendanceService';
 
 interface SupportChatbotProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [config, setConfig] = useState<AttendanceConfig | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Default support WhatsApp link
@@ -30,6 +32,14 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
     return `https://wa.me/${supportPhone}?text=${text}`;
   };
 
+  // Subscribing to the live portal configs to keep data accurate
+  useEffect(() => {
+    const unsub = attendanceService.subscribeToGlobalConfig((data) => {
+      setConfig(data);
+    });
+    return () => unsub();
+  }, []);
+
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setIsTyping(true);
@@ -37,12 +47,12 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
         setMessages([
           {
             sender: 'bot',
-            text: `Hi ${user.name}! 👋 Welcome to the MyCampus Help Desk, developed by Sayan Kumar Patra & the HabaJaba Tech team.`,
+            text: `Hi ${user.name}! 👋 Welcome to the MyCampus Help Desk, powered by Gemini AI and Sayan Kumar Patra's HabaJaba Tech team!`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           },
           {
             sender: 'bot',
-            text: `আমি এখানে যেকোনো সমস্যায় সাহায্য করতে প্রস্তুত। সিলেক্ট করো তোমার প্রশ্ন বা সমস্যা:`,
+            text: `আমি এখানে রুটিন, ফ্যাকাল্টি, নোটিশ বোর্ড এবং যেকোনো বিষয়ে সাহায্য করতে প্রস্তুত। সিলেক্ট করো তোমার জন্য প্রস্তুত কোনো প্রশ্ন অথবা টাইপ করো:`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -56,23 +66,55 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleFAQClick = (question: string, answer: string, waText: string) => {
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    // Add user's question message
-    setMessages(prev => [...prev, { sender: 'user', text: question, time: timeStr }]);
-    
+  const queryChatbotAPI = async (updatedMessages: Message[]) => {
     setIsTyping(true);
-    
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messages: updatedMessages,
+          userContext: {
+            name: user.name,
+            roll: user.roll,
+            email: user.email,
+          },
+          portalConfig: config,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Chatbot response not OK');
+      }
+
+      const data = await response.json();
       setMessages(prev => [...prev, {
         sender: 'bot',
-        text: answer,
+        text: data.reply,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isCustom: true
       }]);
+    } catch (err) {
+      console.error('[Chatbot Query Error]:', err);
+      // Fallback
+      setMessages(prev => [...prev, {
+        sender: 'bot',
+        text: `দুঃখিত! এই মুহূর্তে আমার চ্যাটবট ইঞ্জিন ডাউন আছে। সরাসরি ডেভেলপার সায়নের সাথে হোয়াটস্যাপে যোগাযোগ করতে পারো।`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isCustom: true
+      }]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
+  };
+
+  const handleFAQClick = (question: string) => {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const updated = [...messages, { sender: 'user' as const, text: question, time: timeStr }];
+    setMessages(updated);
+    queryChatbotAPI(updated);
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -81,47 +123,18 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
 
     const userText = inputValue;
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const updated = [...messages, { sender: 'user' as const, text: userText, time: timeStr }];
     
-    setMessages(prev => [...prev, { sender: 'user', text: userText, time: timeStr }]);
+    setMessages(updated);
     setInputValue('');
-    setIsTyping(true);
-
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        sender: 'bot',
-        text: `Got your message! For immediate and personalized resolution regarding "${userText}", Sayan matches directly with you on WhatsApp. Let's open a direct chat token for quick help!`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }]);
-      setIsTyping(false);
-      
-      // Prompt direct WhatsApp redirect after a small delay
-      setTimeout(() => {
-        window.open(getWhatsAppLink(`Hi Sayan, I need help with "${userText}" on MyCampus Student Hub.`), '_blank');
-      }, 1000);
-    }, 800);
+    queryChatbotAPI(updated);
   };
 
   const FAQS = [
-    {
-      q: '📅 Class Routine Problem',
-      a: 'রুটিন সংক্রান্ত সমস্যা: MyCampus-এ তোমাদের ক্লাস শিডিউল সরাসরি একাডেমিক ডাটাবেজ থেকে আপডেট হয়। কোনো ক্লাস টাইম পরিবর্তন করতে হলে বা ভুল ডাটা দেখালে নিচে হোয়াটস্যাপ বোতামে ক্লিক করে ডেভেলপার সায়নকে মেসেজ পাঠাও। উনি ডাটাবেজ ঠিক করে দেবেন।',
-      wa: 'Hi Sayan, our class routine has inaccurate lecture timings. Could you please check the database configuration?'
-    },
-    {
-      q: '📝 Attendance Records Help',
-      a: 'অ্যাটেনডেন্স সংক্রান্ত সমস্যা: তুমি প্রতিদিনের প্রেজেন্ট/অ্যাবসেন্ট সরাসরি ড্যাশবোর্ড থেকে রেজিস্টার করতে পারবে। যদি রিকনসিল করতে কোনো ক্লাস বাদ পড়ে যায় বা ভুল হয়ে থাকে, তবে আমাদের হোয়াটস্যাপ এডমিন সাপোর্টে যোগাযোগ করো।',
-      wa: 'Hi Sayan, I need assistance correcting my attendance history. Some of my marked classes are not reflecting properly.'
-    },
-    {
-      q: '🛡️ Login & Student Registration',
-      a: 'অ্যাক্সেস সমস্যা: কোনো ক্লাসের বন্ধু যদি লগইন করতে বা সাইন-আপ করতে সমস্যা ফেস করে, তবে এডমিন প্যানেল থেকে পেন্ডিং রিকুয়েস্ট অ্যাপ্রুভ করতে হবে।',
-      wa: 'Hi Sayan, one of my classmates is having issues registering/logging in to MyCampus. Could you help review.'
-    },
-    {
-      q: '✨ Add New Feature Idea',
-      a: 'নতুন আইডিয়া বা ফিচার রিকুয়েস্ট: MyCampus-এ কোনো সুন্দর নতুন ফিচার ডিজাইন করাতে চাইলে সরাসরি হাবা-জাবা টেক টিমের সাথে শেয়ার করো! আমরা দারুণ দারুণ ফিচার বানাতে সক্ষম।',
-      wa: 'Hi Sayan, I have a cool new feature idea or UX design enhancement for MyCampus Hub!'
-    }
+    { q: '📅 Today\'s Class Routine / আজকের ক্লাস রুটিন' },
+    { q: '📝 My Attendance Status / আমার অ্যাটেনডেন্স রেকর্ড' },
+    { q: '🛡️ Contact Developer Sayan Patra / সায়নের সাথে যোগাযোগ' },
+    { q: '✨ How to Download MyCampus App / অ্যাপ ডাউনলোড করার উপায়' }
   ];
 
   return (
@@ -190,8 +203,8 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
                   >
                     <p className="whitespace-pre-line">{m.text}</p>
                     
-                    {/* Extra context actions for Bot replies if custom trigger occurs */}
-                    {m.isCustom && (
+                    {/* Extra context actions for Bot replies */}
+                    {m.isCustom && (m.text.includes('+91 8145775413') || m.text.includes('Sayan') || m.text.includes('WhatsApp')) && (
                       <div className="mt-3.5 pt-3 border-t border-dashed border-bc/60">
                         <a 
                           href={getWhatsAppLink()}
@@ -212,7 +225,7 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
               {isTyping && (
                 <div className="flex flex-col items-start">
                   <div className="flex items-center gap-1.5 mb-1 text-[10px] font-bold text-lt">
-                    <span className="text-sf">MyCampus Bot is typing</span>
+                    <span className="text-sf">MyCampus Bot is thinking</span>
                   </div>
                   <div className="bg-wh border border-bc rounded-2xl rounded-tl-none p-3.5 flex items-center gap-1 shadow-ss">
                     <span className="w-2 h-2 bg-lt rounded-full animate-bounce shrink-0" style={{ animationDelay: '0ms' }} />
@@ -233,7 +246,7 @@ export default function SupportChatbot({ isOpen, onClose, user }: SupportChatbot
                     {FAQS.map((faq, i) => (
                       <button
                         key={i}
-                        onClick={() => handleFAQClick(faq.q, faq.a, faq.wa)}
+                        onClick={() => handleFAQClick(faq.q)}
                         className="w-full text-left p-3 bg-wh border border-bc hover:border-green-400 hover:bg-green-50/20 rounded-xl transition-all flex items-center justify-between text-xs font-bold text-dt group"
                       >
                         <span className="truncate pr-2">{faq.q}</span>

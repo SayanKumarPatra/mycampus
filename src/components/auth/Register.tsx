@@ -282,6 +282,33 @@ export default function Register({ onRegistered, onSwitchToLogin }: RegisterProp
             <p className="text-[10px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
             <p className="text-[9px] text-lt font-mono mt-0.5">CEO & Founder: Sayan Kumar Patra</p>
           </div>
+
+          {/* Authentic Google Play styled download badge linked to absolute PWA installation prompt */}
+          <div className="mt-4 flex flex-col items-center justify-center">
+            <button
+              type="button"
+              id="pwa-playstore-download-btn-reg"
+              onClick={() => {
+                if ((window as any).triggerPwaInstall) {
+                  (window as any).triggerPwaInstall();
+                } else {
+                  alert("Student portal PWA engine is starting up. Please click again in a brief second!");
+                }
+              }}
+              className="flex items-center gap-3 bg-[#0f0f14] hover:bg-[#1f1f29] text-white border border-white/10 hover:border-[#ff9d4d]/30 px-5 py-2 rounded-xl transition-all shadow-md group active:scale-95 cursor-pointer"
+            >
+              <svg className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-105" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.6 1.8C3.1 2.3 2.8 3.1 2.8 4.2V35.8C2.8 36.9 3.1 37.7 3.6 38.2L3.8 38.4L22.2 20L3.8 1.6L3.6 1.8Z" fill="#00E5FF" />
+                <path d="M28.3 26.1L22.2 20L3.8 38.4C4.4 39 5.3 39.1 6.4 38.5L28.3 26.1Z" fill="#FF3D00" />
+                <path d="M28.3 13.9L6.4 1.5C5.3 0.9 4.4 1 3.8 1.6L22.2 20L28.3 13.9Z" fill="#4CAF50" />
+                <path d="M34.4 17.4C35.2 17.9 35.6 18.9 35.6 20C35.6 21.1 35.2 22.1 34.4 22.6L28.3 26.1L22.2 20L28.3 13.9L34.4 17.4Z" fill="#FFC107" />
+              </svg>
+              <div className="text-left leading-none">
+                <p className="text-[8px] uppercase tracking-wider font-semibold text-white/50">Google Play Styled</p>
+                <p className="text-[13px] font-bold text-white group-hover:text-[#ff9d4d] transition-colors mt-0.5">Download Now</p>
+              </div>
+            </button>
+          </div>
         </div>
       </motion.div>
 

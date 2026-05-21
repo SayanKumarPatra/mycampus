@@ -33,11 +33,45 @@ export default function PWAInstallBanner() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
+      (window as any).deferredPrompt = e;
+      window.dispatchEvent(new CustomEvent('pwaPromptReady'));
       // Automatically prompt the user by displaying our gorgeous banner
       setIsVisible(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    // Global trigger function accessible anywhere in the app (e.g. Login, Register footers)
+    (window as any).triggerPwaInstall = async () => {
+      const gPrompt = (window as any).deferredPrompt;
+      if (gPrompt) {
+        try {
+          await gPrompt.prompt();
+          const { outcome } = await gPrompt.userChoice;
+          console.log(`[PWA] Global trigger installer outcome: ${outcome}`);
+          (window as any).deferredPrompt = null;
+          setDeferredPrompt(null);
+          setIsVisible(false);
+        } catch (err) {
+          console.error('[PWA] Global installation prompt error:', err);
+        }
+      } else {
+        // If no prompt event, dispatch custom alert or let user know how to add
+        const checkStandalone = window.matchMedia('(display-mode: standalone)').matches 
+          || (window.navigator as any).standalone === true;
+        if (checkStandalone) {
+          alert("MyCampus is already installed as a standalone transition-secure application on your device list!");
+        } else {
+          // If iOS
+          const detectIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+          if (detectIOS) {
+            alert("To install on iOS: Tap the Share button in Safari, then select 'Add to Home Screen'.");
+          } else {
+            alert("To install, open this page in Chrome/Edge, or click 'Add to Home Screen' in your browser options menu!");
+          }
+        }
+      }
+    };
 
     // If on iOS and not standalone, show the instruction prompt after a short delay to feel natural
     if (detectIOS && !checkStandalone) {

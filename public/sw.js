@@ -17,12 +17,20 @@ const PRE_CACHE_ASSETS = [
   '/placeholder.txt'
 ];
 
-// Install Event: Pre-cache basic static assets
+// Install Event: Pre-cache basic static assets resiliently
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching static assets');
-      return cache.addAll(PRE_CACHE_ASSETS);
+      console.log('[Service Worker] Pre-caching static assets individually');
+      // Cache files individually so that if one asset fails, it does not brick the entire install process
+      const cachePromises = PRE_CACHE_ASSETS.map((asset) => {
+        return cache.add(asset)
+          .then(() => console.log(`[Service Worker] Cached asset: ${asset}`))
+          .catch((err) => {
+            console.warn(`[Service Worker] Skipped caching non-critical asset: ${asset}. Error:`, err);
+          });
+      });
+      return Promise.all(cachePromises);
     }).then(() => self.skipWaiting())
   );
 });

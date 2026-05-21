@@ -162,6 +162,27 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
         </div>
         
         <div className="flex items-center gap-3">
+           {/* Custom Google Play install button next to Support Chatbot */}
+           <button 
+             onClick={() => {
+               if ((window as any).triggerPwaInstall) {
+                 (window as any).triggerPwaInstall();
+               } else {
+                 alert("Student portal PWA engine is starting up. Please click again inside a brief second!");
+               }
+             }}
+             className="w-9 h-9 bg-[#ffa75e]/10 text-[#ff9d4d] border border-[#ff9d4d]/20 rounded-rs flex items-center justify-center relative hover:bg-[#ffa75e]/25 transition-all cursor-pointer group"
+             title="Download MyCampus Web App"
+           >
+              {/* Google Play Styled Icon inside Header */}
+              <svg className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.6 1.8C3.1 2.3 2.8 3.1 2.8 4.2V35.8C2.8 36.9 3.1 37.7 3.6 38.2L3.8 38.4L22.2 20L3.8 1.6L3.6 1.8Z" fill="#00E5FF" />
+                <path d="M28.3 26.1L22.2 20L3.8 38.4C4.4 39 5.3 39.1 6.4 38.5L28.3 26.1Z" fill="#FF3D00" />
+                <path d="M28.3 13.9L6.4 1.5C5.3 0.9 4.4 1 3.8 1.6L22.2 20L28.3 13.9Z" fill="#4CAF50" />
+                <path d="M34.4 17.4C35.2 17.9 35.6 18.9 35.6 20C35.6 21.1 35.2 22.1 34.4 22.6L28.3 26.1L22.2 20L28.3 13.9L34.4 17.4Z" fill="#FFC107" />
+              </svg>
+           </button>
+
            <button 
              onClick={() => setIsChatbotOpen(true)}
              className="w-9 h-9 bg-green-500/10 text-green-400 border border-green-500/20 rounded-rs flex items-center justify-center relative hover:bg-green-500/20 transition-all cursor-pointer"
