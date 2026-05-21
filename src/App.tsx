@@ -21,7 +21,7 @@ export default function App() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
-    const savedSess = sessionStorage.getItem('eiilm_sess');
+    const savedSess = localStorage.getItem('eiilm_sess');
     if (savedSess) {
       const parsed = JSON.parse(savedSess) as User;
       checkUserStatus(parsed);
@@ -31,7 +31,7 @@ export default function App() {
   const checkUserStatus = async (currentUser: User) => {
     const freshUser = await userService.getUser(currentUser.email);
     if (freshUser) {
-      sessionStorage.setItem('eiilm_sess', JSON.stringify(freshUser));
+      localStorage.setItem('eiilm_sess', JSON.stringify(freshUser));
       setUser(freshUser);
       if (freshUser.status === 'approved') {
         setView('dashboard');
@@ -39,11 +39,11 @@ export default function App() {
         setView('pending');
       } else {
         setView('login');
-        sessionStorage.removeItem('eiilm_sess');
+        localStorage.removeItem('eiilm_sess');
       }
     } else {
       setView('login');
-      sessionStorage.removeItem('eiilm_sess');
+      localStorage.removeItem('eiilm_sess');
     }
   };
 
@@ -54,7 +54,7 @@ export default function App() {
     const unsubscribe = userService.subscribeToUser(user.email, (freshUser) => {
       if (freshUser) {
         setUser(freshUser);
-        sessionStorage.setItem('eiilm_sess', JSON.stringify(freshUser));
+        localStorage.setItem('eiilm_sess', JSON.stringify(freshUser));
         
         // Handle view routing based on status in real-time
         if (freshUser.status === 'approved') {
@@ -63,7 +63,7 @@ export default function App() {
           setView('pending');
         } else {
           setView('login');
-          sessionStorage.removeItem('eiilm_sess');
+          localStorage.removeItem('eiilm_sess');
           setUser(null);
         }
       }
@@ -76,7 +76,7 @@ export default function App() {
 
   const handleLogin = (u: User) => {
     setUser(u);
-    sessionStorage.setItem('eiilm_sess', JSON.stringify(u));
+    localStorage.setItem('eiilm_sess', JSON.stringify(u));
     if (u.status === 'approved') setView('dashboard');
     else setView('pending');
   };
@@ -84,7 +84,7 @@ export default function App() {
   const handleLogout = () => {
     setUser(null);
     setView('login');
-    sessionStorage.removeItem('eiilm_sess');
+    localStorage.removeItem('eiilm_sess');
   };
 
   if (isInitialLoading) {
@@ -108,7 +108,7 @@ export default function App() {
         <Register 
           onRegistered={(u) => {
             setUser(u);
-            sessionStorage.setItem('eiilm_sess', JSON.stringify(u));
+            localStorage.setItem('eiilm_sess', JSON.stringify(u));
             setView('pending');
           }} 
           onSwitchToLogin={() => setView('login')} 
@@ -130,7 +130,7 @@ export default function App() {
           onLogout={handleLogout} 
           onUserUpdate={(updatedUser) => {
             setUser(updatedUser);
-            sessionStorage.setItem('eiilm_sess', JSON.stringify(updatedUser));
+            localStorage.setItem('eiilm_sess', JSON.stringify(updatedUser));
           }}
         />
       )}
