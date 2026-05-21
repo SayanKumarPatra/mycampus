@@ -12,19 +12,31 @@ const PORT = 3000;
 // Body parser middleware
 app.use(express.json());
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
+// Initialize Gemini Client Lazily with robust checks
+let aiClient: GoogleGenAI | null = null;
+
+function getGeminiClient() {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key || key.trim() === "" || key === "MY_GEMINI_API_KEY") {
+    console.warn("[MyCampus Server] Warning: GEMINI_API_KEY is not configured or is set to placeholder.");
+    return null;
   }
-});
+  if (!aiClient) {
+    aiClient = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  }
+  return aiClient;
+}
 
 // Robust Healthcheck
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  res.json({ status: 'ok', keyStatus: !!process.env.GEMINI_API_KEY, time: new Date().toISOString() });
 });
 
 // Chatbot API Endpoint
@@ -35,9 +47,27 @@ app.post('/api/chatbot', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or missing messages array' });
   }
 
+  // Check if Gemini Client is initialized successfully
+  const ai = getGeminiClient();
+  if (!ai) {
+    return res.json({
+      reply: `নমস্কার ${userContext?.name || 'শিক্ষার্থী'}! 👋 আমি MyCampus AI অ্যাসিস্ট্যান্ট। 
+
+আপনার পোর্টালে চ্যাটবটটি সচল করতে **GEMINI_API_KEY** যোগ করা প্রয়োজন। 
+
+**কিভাবে আপনার API Key যোগ করবেন:**
+১. গুগল এআই স্টুডিও-র (Google AI Studio) ডানদিকের কোণায় **Settings** (গিয়ার আইকন) থেকে **Secrets** অপশনে যান।
+২. সেখানে **GEMINI_API_KEY** নামে একটি নতুন সিক্রেট যোগ করুন এবং আপনার জেমিনি এপিআই কী দিন।
+
+**পোর্টালে কোনো সাহায্য প্রয়োজন হলে:**
+আপনি সরাসরি আমাদের প্রধান ডেভেলপার **সায়ন কুমার পাত্র (Sayan Kumar Patra)** এর সাথে WhatsApp-এ যোগাযোগ করতে পারেন: **+91 8145775413**।`
+    });
+  }
+
   try {
-    // Format messages for the Gemini API: role is "user" or "model"
-    const contents = messages.map((m: any) => ({
+    // Format messages for the Gemini API: role is "user" or "model" limit to last 15 messages for token control
+    const slicedMessages = messages.slice(-15);
+    const contents = slicedMessages.map((m: any) => ({
       role: m.sender === 'user' ? 'user' : 'model',
       parts: [{ text: m.text }]
     }));
@@ -49,7 +79,7 @@ BACKGROUND & DEVELOPER DETAILS:
 - Developed and designed proudly by "HabaJaba Tech" (Based in West Bengal, India).
 - CEO & Founder of HabaJaba Tech: Sayan Kumar Patra. Sayan is the primary developer of this beautiful portal.
 - Contact / Support Line: Sayan Kumar Patra (Phone/WhatsApp: +91 8145775413).
-- If the user asks for help, wants to report issues, correct database, or register complex requests, tell them Sayan is directly available on WhatsApp at +91 8145775413, or they can click the direct floating chat connection buttons.
+- If the user asks for help, wants to report issues, correct database, or register complex requests, tell them Sayan is directly available on WhatsApp at +91 8145775413.
 
 CURRENT STUDENT CONTEXT:
 - Name: ${userContext?.name || 'Student'}
@@ -96,12 +126,19 @@ COMMUNICATION & LANGUAGE RULES:
       }
     });
 
-    const replyText = response.text || "I'm processing MyCampus data. Could you try asking again in a second?";
+    const replyText = response.text || "আরেকবার জিজ্ঞেস করুন দয়া করে, আমি ডেটা প্রসেস করছি।";
     res.json({ reply: replyText });
 
   } catch (error: any) {
     console.error('[Chatbot API Error]:', error);
-    res.status(500).json({ error: error.message || 'Error communicating with Gemini' });
+    // Respond cleanly instead of 500 so the user gets instructions and fallback options
+    res.json({
+      reply: `নমস্কার ${userContext?.name || 'শিক্ষার্থী'}! 👋 আমি দুঃখিত, জেমিনি এপিআই কানেকশনে একটি ত্রুটি দেখা দিয়েছে (${error?.message || 'API Error'})।
+
+দয়া করে চেক করে নিন যে আপনার **Google AI Studio Secrets Settings** এ দেওয়া **GEMINI_API_KEY** টি ক্যাশ বা অ্যাক্টিভ আছে কিনা এবং কোটা শেষ হয়ে যায়নি তো?
+
+যেকোনো সরাসরি প্রয়োজনে আপনি সরাসরি আমাদের ডেভেলপার **সায়ন কুমার পাত্র (Sayan Kumar Patra)** এর সাথে WhatsApp-এ কানেক্ট করতে পারেন: **+91 8145775413**।`
+    });
   }
 });
 

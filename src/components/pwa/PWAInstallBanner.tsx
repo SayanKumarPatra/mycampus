@@ -29,19 +29,39 @@ export default function PWAInstallBanner() {
     const detectIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(detectIOS);
 
-    // 3. Listen for Chrome / Android beforeinstallprompt event
+    // 3. Check for early caught or newly generated beforeinstallprompt event
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       (window as any).deferredPrompt = e;
-      window.dispatchEvent(new CustomEvent('pwaPromptReady'));
-      // Automatically prompt the user by displaying our gorgeous banner
       setIsVisible(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    // If already pre-captured by main.tsx
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+      setIsVisible(true);
+    }
 
-    // Global trigger function accessible anywhere in the app (e.g. Login, Register footers)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    
+    // Custom trigger event notified by hook
+    const handlePromptReady = () => {
+      if ((window as any).deferredPrompt) {
+        setDeferredPrompt((window as any).deferredPrompt);
+        setIsVisible(true);
+      }
+    };
+
+    const handlePromptClosed = () => {
+      setDeferredPrompt(null);
+      setIsVisible(false);
+    };
+
+    window.addEventListener('pwaPromptReady', handlePromptReady);
+    window.addEventListener('pwaPromptClosed', handlePromptClosed);
+
+    // Global trigger function accessible anywhere in the app (e.g. Login, Register or header downloads)
     (window as any).triggerPwaInstall = async () => {
       const gPrompt = (window as any).deferredPrompt;
       if (gPrompt) {
@@ -49,56 +69,47 @@ export default function PWAInstallBanner() {
           await gPrompt.prompt();
           const { outcome } = await gPrompt.userChoice;
           console.log(`[PWA] Global trigger installer outcome: ${outcome}`);
+        } catch (err) {
+          console.error('[PWA] Global installation prompt error:', err);
+        } finally {
           (window as any).deferredPrompt = null;
           setDeferredPrompt(null);
           setIsVisible(false);
-        } catch (err) {
-          console.error('[PWA] Global installation prompt error:', err);
-        }
-      } else {
-        // If no prompt event, dispatch custom alert or let user know how to add
-        const checkStandalone = window.matchMedia('(display-mode: standalone)').matches 
-          || (window.navigator as any).standalone === true;
-        if (checkStandalone) {
-          alert("MyCampus is already installed as a standalone transition-secure application on your device list!");
-        } else {
-          // If iOS
-          const detectIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-          if (detectIOS) {
-            alert("To install on iOS: Tap the Share button in Safari, then select 'Add to Home Screen'.");
-          } else {
-            alert("To install, open this page in Chrome/Edge, or click 'Add to Home Screen' in your browser options menu!");
-          }
+          window.dispatchEvent(new CustomEvent('pwaPromptClosed'));
         }
       }
     };
 
-    // If on iOS and not standalone, show the instruction prompt after a short delay to feel natural
+    // If on iOS and not standalone, show the organic prompt
     if (detectIOS && !checkStandalone) {
       const timer = setTimeout(() => {
         setIsVisible(true);
-      }, 4000); // 4 seconds delay feels organic
+      }, 4000);
       return () => clearTimeout(timer);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('pwaPromptReady', handlePromptReady);
+      window.removeEventListener('pwaPromptClosed', handlePromptClosed);
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    // Trigger the real system installation prompt
-    await deferredPrompt.prompt();
-
-    // Check user decision
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`[PWA] Install choice outcome: ${outcome}`);
-
-    // Clean up
-    setDeferredPrompt(null);
-    setIsVisible(false);
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`[PWA] Install choice outcome: ${outcome}`);
+    } catch (err) {
+      console.error('[PWA] Click install error:', err);
+    } finally {
+      (window as any).deferredPrompt = null;
+      setDeferredPrompt(null);
+      setIsVisible(false);
+      window.dispatchEvent(new CustomEvent('pwaPromptClosed'));
+    }
   };
 
   const handleDismiss = () => {
@@ -107,6 +118,9 @@ export default function PWAInstallBanner() {
 
   // Do not render anything if already installed as standalone
   if (isStandalone) return null;
+
+  // On non-iOS devices, if the deferredPrompt is not available, we hide the banner
+  if (!isIOS && !deferredPrompt) return null;
 
   return (
     <AnimatePresence>
