@@ -5,7 +5,6 @@ import { User as UserType } from '../../types';
 import { userService } from '../../services/userService';
 import { hashPw } from '../../utils';
 import AuthLayout from './AuthLayout';
-import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 interface RegisterProps {
   onRegistered: (user: UserType) => void;
@@ -13,7 +12,6 @@ interface RegisterProps {
 }
 
 export default function Register({ onRegistered, onSwitchToLogin }: RegisterProps) {
-  const { isInstallable, triggerInstall } = usePWAInstall();
   const [formData, setFormData] = useState({
     name: '',
     roll: '',
@@ -280,33 +278,34 @@ export default function Register({ onRegistered, onSwitchToLogin }: RegisterProp
           <p className="text-[9px] text-lt leading-relaxed italic mt-1.5 px-3">
             "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
           </p>
-          <div className="mt-3.5 pt-3 border-t border-dashed border-bc/60">
-            <p className="text-[10px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
-            <p className="text-[9px] text-lt font-mono mt-0.5">CEO & Founder: Sayan Kumar Patra</p>
+
+          {/* Premium Developer Tribute & Contact Profile */}
+          <div className="mt-5 p-3.5 bg-gradient-to-br from-[#0c142c] to-[#04091a] rounded-rm border border-[#1b264f] text-left relative overflow-hidden shadow-md">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-sf/5 rounded-full filter blur-xl" />
+            <div className="absolute -bottom-6 -left-6 w-14 h-14 bg-db/5 rounded-full filter blur-md" />
+            
+            <div className="relative z-10 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[8px] font-black text-sf uppercase tracking-widest bg-sf/10 border border-sf/20 px-2 py-0.5 rounded-full">
+                    👑 Lead Architect
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+                <h4 className="text-[13px] font-black text-wh tracking-wide uppercase font-rajdhani">
+                  Sayan Kumar Patra
+                </h4>
+                <p className="text-[9.5px] text-slate-300 font-semibold mt-0.5">
+                  CEO & Founder, <span className="text-sf font-black">HabaJaba Tech</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider block">EIILM Student</span>
+                <span className="text-[8px] text-sf font-bold italic mt-0.5 block">Portal Creator</span>
+              </div>
+            </div>
           </div>
 
-          {/* Authentic Google Play styled download badge linked to absolute PWA installation prompt */}
-          {isInstallable && (
-            <div className="mt-4 flex flex-col items-center justify-center">
-              <button
-                type="button"
-                id="pwa-playstore-download-btn-reg"
-                onClick={triggerInstall}
-                className="flex items-center gap-3 bg-[#0f0f14] hover:bg-[#1f1f29] text-white border border-white/10 hover:border-[#ff9d4d]/30 px-5 py-2 rounded-xl transition-all shadow-md group active:scale-95 cursor-pointer"
-              >
-                <svg className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-105" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3.6 1.8C3.1 2.3 2.8 3.1 2.8 4.2V35.8C2.8 36.9 3.1 37.7 3.6 38.2L3.8 38.4L22.2 20L3.8 1.6L3.6 1.8Z" fill="#00E5FF" />
-                  <path d="M28.3 26.1L22.2 20L3.8 38.4C4.4 39 5.3 39.1 6.4 38.5L28.3 26.1Z" fill="#FF3D00" />
-                  <path d="M28.3 13.9L6.4 1.5C5.3 0.9 4.4 1 3.8 1.6L22.2 20L28.3 13.9Z" fill="#4CAF50" />
-                  <path d="M34.4 17.4C35.2 17.9 35.6 18.9 35.6 20C35.6 21.1 35.2 22.1 34.4 22.6L28.3 26.1L22.2 20L28.3 13.9L34.4 17.4Z" fill="#FFC107" />
-                </svg>
-                <div className="text-left leading-none">
-                  <p className="text-[8px] uppercase tracking-wider font-semibold text-white/50">Google Play Styled</p>
-                  <p className="text-[13px] font-bold text-white group-hover:text-[#ff9d4d] transition-colors mt-0.5">Download Now</p>
-                </div>
-              </button>
-            </div>
-          )}
         </div>
       </motion.div>
 

@@ -34,6 +34,9 @@ export interface AttendanceData {
 export interface SubjectConfig {
   code: string;
   totalClasses: number;
+  syllabusProgress?: number; // 0 to 100 percentage
+  currentTopic?: string; // currently taught in class
+  topics?: { name: string; completed: boolean }[]; // syllabus checklist
 }
 
 export interface StudyMaterial {

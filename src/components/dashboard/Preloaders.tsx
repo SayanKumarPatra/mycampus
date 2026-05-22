@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { 
   Terminal, 
   Database, 
-  Layers, 
+  Coffee, 
+  Binary,
   Activity,
   FileText
 } from 'lucide-react';
@@ -65,9 +66,9 @@ export function AppPreloader({ onComplete }: { onComplete: () => void }) {
       />
 
       {/* Floating Mini Symbols in a horizontal line */}
-      <div className="flex gap-14 sm:gap-20 items-center justify-center absolute inset-x-0 top-1/3 z-20 px-8">
+      <div className="flex gap-8 sm:gap-14 items-center justify-center absolute inset-x-0 top-1/3 z-20 px-8">
         
-        {/* ICON 1: C PROGRAMMING (Mini Cyan SVG) */}
+        {/* ICON 1: C++ */}
         <motion.div 
           variants={dynamicGravityVariants(0.0)}
           initial="hidden"
@@ -79,28 +80,40 @@ export function AppPreloader({ onComplete }: { onComplete: () => void }) {
           <span className="text-[9px] font-black tracking-widest text-sky-300 font-mono mt-2 opacity-90">C++</span>
         </motion.div>
 
-        {/* ICON 2: DBMS / DATABASE (Mini Emerald SVG) */}
+        {/* ICON 2: JAVA */}
         <motion.div 
-          variants={dynamicGravityVariants(0.12)}
+          variants={dynamicGravityVariants(0.08)}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center justify-center pointer-events-none relative"
+        >
+          <div className="absolute w-8 h-8 bg-[#ff9d4d]/20 rounded-full filter blur-md pointer-events-none" />
+          <Coffee size={38} className="text-[#ff9d4d] drop-shadow-[0_0_12px_rgba(255,157,77,0.85)] relative z-10" />
+          <span className="text-[9px] font-black tracking-widest text-[#ffa75e] font-mono mt-2 opacity-90">JAVA</span>
+        </motion.div>
+
+        {/* ICON 3: PYTHON */}
+        <motion.div 
+          variants={dynamicGravityVariants(0.16)}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center justify-center pointer-events-none relative"
+        >
+          <div className="absolute w-8 h-8 bg-yellow-400/20 rounded-full filter blur-md pointer-events-none" />
+          <Binary size={38} className="text-yellow-400 drop-shadow-[0_0_12px_rgba(250,204,21,0.85)] relative z-10" />
+          <span className="text-[9px] font-black tracking-widest text-yellow-300 font-mono mt-2 opacity-90">PYTHON</span>
+        </motion.div>
+
+        {/* ICON 4: DATABASE */}
+        <motion.div 
+          variants={dynamicGravityVariants(0.24)}
           initial="hidden"
           animate="visible"
           className="flex flex-col items-center justify-center pointer-events-none relative"
         >
           <div className="absolute w-8 h-8 bg-emerald-400/20 rounded-full filter blur-md pointer-events-none" />
           <Database size={38} className="text-emerald-400 drop-shadow-[0_0_12px_rgba(52,211,153,0.85)] relative z-10" />
-          <span className="text-[9px] font-black tracking-widest text-emerald-300 font-mono mt-2 opacity-90">DBMS</span>
-        </motion.div>
-
-        {/* ICON 3: BCA ACADEMICS (Mini Amber SVG) */}
-        <motion.div 
-          variants={dynamicGravityVariants(0.06)}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col items-center justify-center pointer-events-none relative"
-        >
-          <div className="absolute w-8 h-8 bg-amber-400/20 rounded-full filter blur-md pointer-events-none" />
-          <Layers size={38} className="text-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.85)] relative z-10" />
-          <span className="text-[9px] font-black tracking-widest text-amber-300 font-mono mt-2 opacity-90">BCA</span>
+          <span className="text-[9px] font-black tracking-widest text-emerald-300 font-mono mt-2 opacity-90">DATABASE</span>
         </motion.div>
 
       </div>

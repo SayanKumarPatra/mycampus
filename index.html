@@ -4,34 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyCampus</title>
-    <!-- PWA Settings and Manifest Links -->
-    <meta name="theme-color" content="#7A0F3A" />
-    <meta name="description" content="Smart Student Portal for Students" />
-    <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="MyCampus" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#7A0F3A" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        // Register the service worker immediately for much faster PWA installability detection
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => {
-            console.log('[PWA] Service Worker registered with scope:', reg.scope);
-            // Proactively check for updates to keep the PWA completely fresh
-            reg.update();
-          })
-          .catch(err => {
-            console.error('[PWA] Service Worker register failure:', err);
-          });
-      }
-    </script>
   </body>
 </html>
 

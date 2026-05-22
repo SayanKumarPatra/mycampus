@@ -34,7 +34,6 @@ import Routine from './Routine';
 import Faculty from './Faculty';
 import Profile from './Profile';
 import SupportChatbot from './SupportChatbot';
-import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 interface DashboardProps {
   user: User;
@@ -76,7 +75,6 @@ const isCurrentTimeInClass = (currentTime: Date, classTimeRange: string): boolea
 export type PageId = 'home' | 'attendance' | 'notes' | 'results' | 'notices' | 'routine' | 'faculty' | 'profile';
 
 export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardProps) {
-  const { isInstallable, triggerInstall } = usePWAInstall();
   const [activePage, setActivePage] = useState<PageId>('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -84,9 +82,49 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   const triggerPageChange = (page: PageId) => {
-    if (page === activePage) return;
-    setActivePage(page);
+    window.location.hash = page;
   };
+
+  const handleCloseChatbot = () => {
+    if (window.location.hash.includes('/support')) {
+      window.location.hash = activePage;
+    } else {
+      setIsChatbotOpen(false);
+    }
+  };
+
+  // Synchronize state with URL hash
+  useEffect(() => {
+    const handleHashCheck = () => {
+      const hash = window.location.hash;
+      if (!hash) {
+        window.location.hash = 'home';
+        return;
+      }
+      
+      const cleanHash = hash.replace('#', '');
+      const parts = cleanHash.split('/');
+      const pagePart = parts[0] as PageId;
+      
+      const validPages: PageId[] = ['home', 'attendance', 'notes', 'results', 'notices', 'routine', 'faculty', 'profile'];
+      if (validPages.includes(pagePart)) {
+        setActivePage(pagePart);
+      }
+      
+      if (cleanHash.includes('/support')) {
+        setIsChatbotOpen(true);
+      } else {
+        setIsChatbotOpen(false);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashCheck);
+    handleHashCheck();
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashCheck);
+    };
+  }, []);
 
   useEffect(() => {
     // Handle home screen context menu shortcuts
@@ -96,8 +134,8 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
       const pageId = shortcut.toLowerCase() as PageId;
       const validPages: PageId[] = ['home', 'attendance', 'notes', 'results', 'notices', 'routine', 'faculty', 'profile'];
       if (validPages.includes(pageId)) {
-        setActivePage(pageId);
-        // Prune the query param to keep the url neat and avoid resetting active option on subsequent triggers
+        window.location.hash = pageId;
+        // Prune the query param to keep the url neat
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
       }
@@ -178,25 +216,11 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
         </div>
         
         <div className="flex items-center gap-3">
-           {/* Custom Google Play install button next to Support Chatbot */}
-           {isInstallable && (
-             <button 
-               onClick={triggerInstall}
-               className="w-9 h-9 bg-[#ffa75e]/10 text-[#ff9d4d] border border-[#ff9d4d]/20 rounded-rs flex items-center justify-center relative hover:bg-[#ffa75e]/25 transition-all cursor-pointer group"
-               title="Download MyCampus Web App"
-             >
-                {/* Google Play Styled Icon inside Header */}
-                <svg className="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3.6 1.8C3.1 2.3 2.8 3.1 2.8 4.2V35.8C2.8 36.9 3.1 37.7 3.6 38.2L3.8 38.4L22.2 20L3.8 1.6L3.6 1.8Z" fill="#00E5FF" />
-                  <path d="M28.3 26.1L22.2 20L3.8 38.4C4.4 39 5.3 39.1 6.4 38.5L28.3 26.1Z" fill="#FF3D00" />
-                  <path d="M28.3 13.9L6.4 1.5C5.3 0.9 4.4 1 3.8 1.6L22.2 20L28.3 13.9Z" fill="#4CAF50" />
-                  <path d="M34.4 17.4C35.2 17.9 35.6 18.9 35.6 20C35.6 21.1 35.2 22.1 34.4 22.6L28.3 26.1L22.2 20L28.3 13.9L34.4 17.4Z" fill="#FFC107" />
-                </svg>
-             </button>
-           )}
 
-           <button 
-             onClick={() => setIsChatbotOpen(true)}
+            <button 
+              onClick={() => {
+                window.location.hash = `${activePage}/support`;
+              }}
              className="w-9 h-9 bg-green-500/10 text-green-400 border border-green-500/20 rounded-rs flex items-center justify-center relative hover:bg-green-500/20 transition-all cursor-pointer"
              title="Need Help? Open Support Chatbot"
            >
@@ -300,14 +324,29 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
             </div>
           </nav>
           
-          <footer className="p-4 border-t border-bc text-center">
-             <p className="text-[10px] font-bold text-dt uppercase tracking-wide">MyCampus Student Hub</p>
-             <p className="text-[8px] text-lt leading-relaxed italic mt-1 px-1">
-               "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
+          <footer className="p-4 border-t border-bc bg-slate-950 text-slate-300 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-12 h-12 bg-sf/5 rounded-full filter blur-md" />
+             <p className="text-[10px] font-black text-wh uppercase tracking-wider relative z-10 text-center">
+               MyCampus Student Hub
              </p>
-             <div className="mt-2.5 pt-2 border-t border-dashed border-bc/60">
-               <p className="text-[9px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
-               <p className="text-[8px] text-lt font-mono">CEO & Founder: Sayan Kumar Patra</p>
+             <p className="text-[8px] text-slate-400 leading-relaxed italic mt-1 relative z-10 text-center">
+               "Independent student-made platform, not officially affiliated with EIILM Kolkata."
+             </p>
+             <div className="mt-3 pt-2.5 border-t border-slate-900 flex flex-col gap-1 relative z-10">
+               <div className="flex items-center justify-between">
+                 <p className="text-[9px] text-slate-400 font-semibold">Developed by <span className="text-sf font-black">HabaJaba Tech</span></p>
+               </div>
+               <div className="flex items-center justify-between">
+                 <p className="text-[8px] text-wh font-black uppercase tracking-wide">Sayan Kumar Patra</p>
+                 <a 
+                   href="https://wa.me/918145775413" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5 hover:underline"
+                 >
+                   <span>+91 81457 75413</span>
+                 </a>
+               </div>
              </div>
           </footer>
         </aside>
@@ -397,14 +436,29 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
                     </button>
                   </div>
                 </nav>
-                <footer className="p-5 border-t border-bc text-center">
-                  <p className="text-[10px] font-bold text-dt uppercase tracking-wide">MyCampus Student Hub</p>
-                  <p className="text-[9px] text-lt leading-relaxed italic mt-1 px-1">
-                    "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
+                <footer className="p-5 border-t border-bc bg-slate-950 text-slate-300 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-12 h-12 bg-sf/5 rounded-full filter blur-md" />
+                  <p className="text-[10px] font-black text-wh uppercase tracking-wider relative z-10 text-center">
+                    MyCampus Student Hub
                   </p>
-                  <div className="mt-2.5 pt-2 border-t border-dashed border-bc/60">
-                    <p className="text-[9px] text-mt">Developed by <span className="font-bold text-sf">HabaJaba Tech</span></p>
-                    <p className="text-[8px] text-lt font-mono">CEO & Founder: Sayan Kumar Patra</p>
+                  <p className="text-[8px] text-slate-400 leading-relaxed italic mt-1 relative z-10 text-center">
+                    "Independent student-made platform, not officially affiliated with EIILM Kolkata."
+                  </p>
+                  <div className="mt-3 pt-2.5 border-t border-slate-900 flex flex-col gap-1 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[9px] text-slate-400 font-semibold">Developed by <span className="text-sf font-black">HabaJaba Tech</span></p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[8px] text-wh font-black uppercase tracking-wide">Sayan Kumar Patra</p>
+                      <a 
+                        href="https://wa.me/918145775413" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5 hover:underline"
+                      >
+                        <span>+91 81457 75413</span>
+                      </a>
+                    </div>
                   </div>
                 </footer>
               </motion.aside>
@@ -497,7 +551,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
       </div>  </div>
       
       {/* Support Chatbot Modal Panel */}
-      <SupportChatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} user={user} />
+      <SupportChatbot isOpen={isChatbotOpen} onClose={handleCloseChatbot} user={user} />
     </div>
   );
 }

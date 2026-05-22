@@ -1,70 +1,13 @@
 {
-  "id": "/",
   "name": "MyCampus",
   "short_name": "MyCampus",
-  "description": "Smart Student Portal for Students",
-  "lang": "en",
-  "dir": "ltr",
-  "scope": "/",
-  "theme_color": "#7A0F3A",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "display_override": ["standalone"],
+  "description": "Premium Portal for Student Dynamics & Modern Academics",
   "start_url": "/",
+  "display": "standalone",
+  "background_color": "#7A0F3A",
+  "theme_color": "#7A0F3A",
   "orientation": "portrait-primary",
   "categories": ["education", "productivity"],
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "shortcuts": [
-    {
-      "name": "Attendance",
-      "url": "/?shortcut=attendance",
-      "description": "View and manage your attendance logs",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Notes",
-      "url": "/?shortcut=notes",
-      "description": "Access semester notes and study materials",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Routine",
-      "url": "/?shortcut=routine",
-      "description": "View class timetable and schedules",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Results",
-      "url": "/?shortcut=results",
-      "description": "Check exams and grades results",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -73,10 +16,22 @@
       "purpose": "any"
     },
     {
+      "src": "/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-128x128.png",
@@ -85,10 +40,22 @@
       "purpose": "any"
     },
     {
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icons/icon-152x152.png",
@@ -97,13 +64,19 @@
       "purpose": "any"
     },
     {
+      "src": "/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
@@ -115,30 +88,22 @@
       "purpose": "any"
     },
     {
+      "src": "/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/screenshot_narrow.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshots/screenshot_wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
     }
   ]
 }
