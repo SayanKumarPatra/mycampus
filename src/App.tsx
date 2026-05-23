@@ -20,6 +20,17 @@ export default function App() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
+    // Register Service Worker for push notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+          console.log('ServiceWorker registered successfully');
+        })
+        .catch(err => {
+          console.warn('ServiceWorker registration failed', err);
+        });
+    }
+
     const savedSess = localStorage.getItem('eiilm_sess');
     if (savedSess) {
       const parsed = JSON.parse(savedSess) as User;

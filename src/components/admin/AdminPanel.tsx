@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, X, Key, Eye, EyeOff, Users as UsersIcon, Clock, CheckCircle, ShieldAlert, Calendar, GraduationCap, Building, Phone, Trash2, Search, Notebook, Award, Megaphone, MapPin, Mail, CreditCard, IndianRupee, Pencil, BookOpen, Sliders, CheckSquare, Square, Plus } from 'lucide-react';
+import { ShieldCheck, X, Key, Eye, EyeOff, Users as UsersIcon, Clock, CheckCircle, ShieldAlert, Calendar, GraduationCap, Building, Phone, Trash2, Search, Notebook, Award, Megaphone, MapPin, Mail, CreditCard, IndianRupee, Pencil, BookOpen, Sliders, CheckSquare, Square, Plus, Sparkles, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, UserStatus } from '../../types';
 import { userService } from '../../services/userService';
@@ -18,11 +18,12 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty' | 'chatbot'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty' | 'chatbot' | 'device_notifications'>('pending');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [updateMsg, setUpdateMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [attConfig, setAttConfig] = useState<AttendanceConfig>({ subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] });
+  const [newDeviceNotification, setNewDeviceNotification] = useState({ title: '', body: '' });
   const [newMaterial, setNewMaterial] = useState({ subjectCode: '', title: '', driveLink: '' });
   const [newResult, setNewResult] = useState({ title: '', link: '' });
   const [newNotice, setNewNotice] = useState({ title: '', tag: 'Academic', type: 'info' as 'info' | 'critical' | 'warning' });
@@ -104,6 +105,19 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     newConfig.subjects = subjects;
     setAttConfig(newConfig);
     await attendanceService.saveGlobalConfig(newConfig);
+  };
+
+  const handleToggleWeekendAttendance = async (day: 'saturday' | 'sunday') => {
+    const newConfig = { ...attConfig };
+    if (day === 'saturday') {
+      newConfig.allowSaturdayAttendance = !newConfig.allowSaturdayAttendance;
+    } else {
+      newConfig.allowSundayAttendance = !newConfig.allowSundayAttendance;
+    }
+    setAttConfig(newConfig);
+    await attendanceService.saveGlobalConfig(newConfig);
+    setUpdateMsg(`${day === 'saturday' ? 'Saturday' : 'Sunday'} attendance status updated ✓`);
+    setTimeout(() => setUpdateMsg(''), 2000);
   };
 
   const handleAddMaterial = async (e: React.FormEvent) => {
@@ -196,7 +210,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     if (editingNoticeId) {
       newConfig.notices = (newConfig.notices || []).map(n => {
         if (n.id === editingNoticeId) {
-          return { ...n, ...newNotice };
+          return { ...n, ...newNotice, publishedAt: Date.now() };
         }
         return n;
       });
@@ -228,6 +242,43 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
       setEditingNoticeId(null);
       setNewNotice({ title: '', tag: 'Academic', type: 'info' });
     }
+  };
+
+  const handlePostDeviceNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDeviceNotification.title || !newDeviceNotification.body) return;
+
+    const newConfig = { ...attConfig };
+    const alertItem = {
+      id: `dev_alert_${Date.now()}`,
+      title: newDeviceNotification.title.trim(),
+      body: newDeviceNotification.body.trim(),
+      publishedAt: Date.now()
+    };
+
+    newConfig.deviceNotification = alertItem;
+    newConfig.deviceNotificationHistory = [
+      alertItem,
+      ...(newConfig.deviceNotificationHistory || [])
+    ];
+
+    setAttConfig(newConfig);
+    await attendanceService.saveGlobalConfig(newConfig);
+    setNewDeviceNotification({ title: '', body: '' });
+    setUpdateMsg('ডিভাইস নোটিফিকেশন সফলভাবে পাঠানো হয়েছে ✓');
+    setTimeout(() => setUpdateMsg(''), 2000);
+  };
+
+  const handleDeleteDeviceNotification = async (id: string) => {
+    const newConfig = { ...attConfig };
+    newConfig.deviceNotificationHistory = (newConfig.deviceNotificationHistory || []).filter(item => item.id !== id);
+    if (newConfig.deviceNotification?.id === id) {
+      delete newConfig.deviceNotification;
+    }
+    setAttConfig(newConfig);
+    await attendanceService.saveGlobalConfig(newConfig);
+    setUpdateMsg('ডিভাইস অ্যালার্ট ডিলিট করা হয়েছে ✓');
+    setTimeout(() => setUpdateMsg(''), 2000);
   };
 
   const handleAddRoutine = async (e: React.FormEvent) => {
@@ -508,6 +559,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
               { id: 'materials', label: 'Materials', icon: Notebook },
               { id: 'results', label: 'Results', icon: Award },
               { id: 'notices', label: 'Notices', icon: Megaphone },
+              { id: 'device_notifications', label: 'Device Alerts 🔔', icon: Bell },
               { id: 'routine', label: 'Routine', icon: Calendar },
               { id: 'faculty', label: 'Faculty', icon: GraduationCap },
               { id: 'chatbot', label: 'Chatbot (AI)', icon: ShieldCheck }
@@ -554,6 +606,60 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                       <span className="text-[10px] bg-sky-50 text-sky-700 font-extrabold uppercase border border-sky-100 px-3 py-1 rounded-full tracking-wider">
                         Realtime Tracker
                       </span>
+                    </div>
+
+                    {/* Weekend/Holiday Attendance Override Section */}
+                    <div className="bg-amber-50/50 border border-amber-200/50 rounded-rs p-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                      <div>
+                        <h4 className="text-[12px] font-bold text-amber-900 flex items-center gap-1.5">
+                          <Sparkles size={14} className="text-amber-600 shrink-0" />
+                          উইকেন্ড হলিডে সেটিংস (Weekend Holiday Settings)
+                        </h4>
+                        <p className="text-[10px] text-amber-700/80 mt-1 leading-relaxed">
+                          শনিবার ও রবিবারকে ডিফল্ট হিসেবে ছুটির দিন (হলিডে) বিবেচনা করা হয়। ছাত্রছাত্রীরা এই দিনগুলিতে কোনো ক্লাস অ্যাটেন্ডেন্স দিতে পারবে না, যদি না আপনি নিচের সুইচটি অন করে সাময়িকভাবে ওই দিনের ক্লাস অনুমোদন করেন।
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        {/* Saturday Toggle */}
+                        <div className="flex items-center gap-2.5 bg-wh border border-bc px-3 py-2 rounded-rs shadow-ss">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-extrabold text-dt">Saturday</span>
+                            <span className="text-[8.5px] font-bold text-lt uppercase">শনিবার</span>
+                          </div>
+                          <button
+                            onClick={() => handleToggleWeekendAttendance('saturday')}
+                            className={`w-10 h-6 rounded-full p-0.5 transition-colors focus:outline-none ${
+                              attConfig.allowSaturdayAttendance ? 'bg-green-600' : 'bg-slate-300'
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 bg-wh rounded-full shadow-md transform transition-transform duration-200 ${
+                                attConfig.allowSaturdayAttendance ? 'translate-x-4' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Sunday Toggle */}
+                        <div className="flex items-center gap-2.5 bg-wh border border-bc px-3 py-2 rounded-rs shadow-ss">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-extrabold text-dt">Sunday</span>
+                            <span className="text-[8.5px] font-bold text-lt uppercase">রবিবার</span>
+                          </div>
+                          <button
+                            onClick={() => handleToggleWeekendAttendance('sunday')}
+                            className={`w-10 h-6 rounded-full p-0.5 transition-colors focus:outline-none ${
+                              attConfig.allowSundayAttendance ? 'bg-green-600' : 'bg-slate-300'
+                            }`}
+                          >
+                            <div
+                              className={`w-5 h-5 bg-wh rounded-full shadow-md transform transition-transform duration-200 ${
+                                attConfig.allowSundayAttendance ? 'translate-x-4' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1546,6 +1652,107 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                                 <p className="text-xs text-mt font-bold">Faculty list is empty. Add profiles to show to students.</p>
                              </div>
                            )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : activeTab === 'device_notifications' ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-wh border border-bc rounded-rm p-6 shadow-ss space-y-6"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-bc">
+                      <div className="flex items-center gap-2">
+                         <Bell size={18} className="text-db" />
+                         <h3 className="text-base font-bold text-dt">গলোবাল ডিভাইস পুশ নোটিফিকেশন / Device Alerts Control</h3>
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-mt leading-relaxed bg-bg p-3.5 rounded-rs border border-bc font-semibold">
+                      📢 এই সেকশন থেকে পাঠানো নোটিফিকেশনগুলি সরাসরি স্টুডেন্টদের মোবাইলের হোম স্ক্রীন বা লক স্ক্রীমে পপ-আপ (Push Notification) আকারে যাবে। ফোন লক থাকলেও রিয়েলটাইমে নোটিফিকেশন রিসিভ হবে!
+                    </p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                      {/* Form block */}
+                      <form onSubmit={handlePostDeviceNotification} className="lg:col-span-5 border border-bc rounded-rs p-4 space-y-4 bg-bg/50">
+                        <div>
+                          <h4 className="text-[11px] font-bold text-db uppercase tracking-wider mb-2">ব্রডকাস্ট নোটিফিকেশন এড করুন / Broadcast New Alert</h4>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-dt uppercase tracking-wider"> নোটিফিকেশন টাইটেল / Alert Title</label>
+                            <input 
+                              type="text"
+                              className="inp h-9 px-3 text-xs"
+                              placeholder="e.g., জরুরি ক্লাস পরিবর্তন! 🔔"
+                              value={newDeviceNotification.title}
+                              onChange={(e) => setNewDeviceNotification({ ...newDeviceNotification, title: e.target.value })}
+                              required
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-dt uppercase tracking-wider"> নোটিফিকেশন মেসেজ / Alert Message Body</label>
+                            <textarea 
+                              rows={4}
+                              className="inp p-3 text-xs resize-none"
+                              placeholder="মেসেজটি এখানে লিখুন যা সরাসরি স্টুডেন্টদের লক স্ক্রিনে দেখা যাবে..."
+                              value={newDeviceNotification.body}
+                              onChange={(e) => setNewDeviceNotification({ ...newDeviceNotification, body: e.target.value })}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <button 
+                          type="submit"
+                          className="w-full h-9 bg-db hover:bg-db2 text-white font-extrabold text-[11px] tracking-wider uppercase rounded shadow-ss transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Bell size={13} />
+                          ডিভাইস নোটিফিকেশন পাঠান 🚀
+                        </button>
+                      </form>
+
+                      {/* History block */}
+                      <div className="lg:col-span-7 space-y-4">
+                        <div className="p-1 px-2 border-b border-bc bg-slate-50 flex items-center gap-2 rounded-t-rs">
+                          <Clock size={14} className="text-dt" />
+                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">নোটিফিকেশনের ইতিহাস / Alerts Broadcast Log</span>
+                        </div>
+
+                        <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                          {(attConfig.deviceNotificationHistory || []).map((notif) => (
+                            <div key={notif.id} className="bg-wh border border-bc rounded-rs p-3 flex items-start gap-3 hover:border-db/35 transition-colors group">
+                              <div className="p-2 bg-db/[0.04] text-db rounded-full shrink-0 mt-0.5">
+                                <Bell size={14} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <h4 className="text-[12px] font-bold text-dt leading-tight">{notif.title}</h4>
+                                  <span className="text-[9px] text-lt font-semibold shrink-0">
+                                    {new Date(notif.publishedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                  </span>
+                                </div>
+                                <p className="text-[10.5px] text-mt mt-1 leading-relaxed">{notif.body}</p>
+                              </div>
+                              <button 
+                                onClick={() => handleDeleteDeviceNotification(notif.id)}
+                                className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 shrink-0 ml-1 transition-all md:opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                title="Delete Notification from history"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          ))}
+
+                          {(attConfig.deviceNotificationHistory || []).length === 0 && (
+                            <div className="py-12 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
+                               <Bell size={36} className="mx-auto mb-2 text-bc opacity-50" />
+                               <p className="text-xs text-mt italic">কোনো ডিভাইস নোটিফিকেশনের রেকর্ড খুঁজে পাওয়া যায়নি।</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

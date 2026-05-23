@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, CalendarCheck, Notebook, Award, Megaphone, Users, Star, AlertTriangle, X, ChevronRight, TrendingUp, Bell, Calendar, BookOpen, CheckSquare, Square, Sliders, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { motion } from 'motion/react';
+import { LayoutDashboard, Fingerprint, Trophy, BellRing, CalendarDays, GraduationCap, Star, AlertTriangle, X, ChevronRight, TrendingUp, Bell, Calendar, BookOpen, CheckSquare, Square, Sliders, CheckCircle, ChevronDown, ChevronUp, Coffee, Copy, Check, ExternalLink, QrCode } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { User, AttendanceConfig } from '../../types';
 import { attendanceService as attSvc } from '../../services/attendanceService';
 import { SUBJECTS } from '../../constants';
@@ -15,6 +15,96 @@ interface HomeProps {
 
 export default function Home({ user, onNavigate }: HomeProps) {
   const [stats, setStats] = useState({ pct: 0, present: 0, total: 0 });
+  const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [paymentToast, setPaymentToast] = useState('');
+
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  const handleUPIPayment = (app: 'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'amazonpay' | 'fampay' | 'navi' | 'generic') => {
+    const upiId = 'BHARATPE09903189531@yesbankltd';
+    const upiLink = `upi://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+    
+    // Auto copy as safe fallback
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upiId);
+      }
+    } catch (e) {
+      console.warn("Auto-copy bypassed", e);
+    }
+
+    if (isMobileDevice()) {
+      let deepLink = upiLink;
+      if (app === 'gpay') {
+        deepLink = `tez://upi/pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'phonepe') {
+        deepLink = `phonepe://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'paytm') {
+        deepLink = `paytmmp://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'bhim') {
+        deepLink = `bhim://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'amazonpay') {
+        deepLink = `amazon://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'fampay') {
+        deepLink = `fampay://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      } else if (app === 'navi') {
+        deepLink = `navi://pay?pa=${upiId}&pn=Sayan%20Kumar%20Patra&tn=Coffee%20for%20Developer&cu=INR`;
+      }
+
+      const labels: Record<string, string> = {
+        gpay: 'Google Pay',
+        phonepe: 'PhonePe',
+        paytm: 'Paytm',
+        bhim: 'BHIM UPI',
+        amazonpay: 'Amazon Pay',
+        fampay: 'FamPay',
+        navi: 'Navi',
+        generic: 'UPI'
+      };
+
+      const appLabel = labels[app] || 'UPI';
+      setPaymentToast(`Opening ${appLabel} to send coffee support...`);
+      setTimeout(() => setPaymentToast(''), 3000);
+      window.location.href = deepLink;
+    } else {
+      // Desktop experience
+      setPaymentToast(`UPI ID copied automatically! Please scan the QR code to finish.`);
+      setCopied(true);
+      setShowQR(true);
+      setTimeout(() => {
+        setPaymentToast('');
+        setCopied(false);
+      }, 4000);
+    }
+  };
+
+  const handleCopyUPI = () => {
+    const upiId = 'BHARATPE09903189531@yesbankltd';
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upiId).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = upiId;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const [greeting, setGreeting] = useState('');
   const [recentNotices, setRecentNotices] = useState<any[]>([]);
   const [globalConfig, setGlobalConfig] = useState<AttendanceConfig | null>(null);
@@ -80,12 +170,12 @@ export default function Home({ user, onNavigate }: HomeProps) {
   }, [user.id]);
 
   const quicklinks: { id: PageId; label: string; icon: any; color: string }[] = [
-    { id: 'attendance', label: 'Attendance', icon: CalendarCheck, color: 'bg-db/10 text-db' },
-    { id: 'notes', label: 'Notes', icon: Notebook, color: 'bg-blue-50 text-blue-600' },
-    { id: 'results', label: 'Results', icon: Award, color: 'bg-[#fff0e0] text-[#c06010]' },
-    { id: 'notices', label: 'Notices', icon: Megaphone, color: 'bg-red-50 text-red-600' },
-    { id: 'routine', label: 'Routine', icon: Calendar, color: 'bg-teal-50 text-teal-600' },
-    { id: 'faculty', label: 'Faculty', icon: Users, color: 'bg-green-50 text-green-600' },
+    { id: 'attendance', label: 'Attendance', icon: Fingerprint, color: 'bg-db/10 text-db' },
+    { id: 'notes', label: 'Notes', icon: BookOpen, color: 'bg-blue-50 text-blue-600' },
+    { id: 'results', label: 'Results', icon: Trophy, color: 'bg-[#fff0e0] text-[#c06010]' },
+    { id: 'notices', label: 'Notices', icon: BellRing, color: 'bg-red-50 text-red-600' },
+    { id: 'routine', label: 'Routine', icon: CalendarDays, color: 'bg-teal-50 text-teal-600' },
+    { id: 'faculty', label: 'Faculty', icon: GraduationCap, color: 'bg-green-50 text-green-600' },
   ];
 
   return (
@@ -330,11 +420,12 @@ export default function Home({ user, onNavigate }: HomeProps) {
         <div>
            <div className="flex items-center justify-between mb-3.5">
             <h3 className="text-sm font-bold text-dt flex items-center gap-2">
-              <Megaphone size={18} className="text-db" />
+              <BellRing size={18} className="text-db" />
               Recent Notices
             </h3>
             <button onClick={() => onNavigate('notices')} className="text-xs font-bold text-sf hover:underline">View All</button>
           </div>
+
           <div className="bg-wh border border-bc rounded-rm overflow-hidden shadow-ss">
              <div className="bg-db p-2.5 flex items-center gap-2">
                 <Bell size={16} className="text-sf" />
@@ -415,11 +506,214 @@ export default function Home({ user, onNavigate }: HomeProps) {
                onClick={() => onNavigate('attendance')}
                className="btn-primary py-2.5 text-xs"
              >
-                <CalendarCheck size={14} />
+                <Fingerprint size={14} />
                 Mark Daily Attendance
              </button>
           </div>
         </div>
+      </div>
+
+      {/* Developer Donation Section */}
+      <div className="bg-gradient-to-r from-db to-db2 rounded-rl p-5 text-wh relative overflow-hidden shadow-md mt-6 border border-wh/10">
+        <div className="absolute top-[-30px] right-[-30px] w-36 h-36 rounded-full bg-sf/5 pointer-events-none" />
+        <div className="absolute bottom-[-40px] left-[-10px] w-24 h-24 rounded-full bg-wh/5 pointer-events-none" />
+        
+        {/* Animated Toast/Banner inside Card */}
+        <AnimatePresence>
+          {paymentToast && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 bg-sf/20 border border-sf/40 py-2.5 px-4 rounded-rs text-[12px] font-bold text-sf flex items-center gap-2 shadow-md relative z-20 backdrop-blur-sm"
+            >
+              <div className="w-2 h-2 rounded-full bg-sf animate-ping shrink-0" />
+              <span>{paymentToast}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
+          {/* Motivation Text & Interactive App Icons Grid */}
+          <div className="min-w-0 flex-1 space-y-3 w-full">
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="w-8 h-8 rounded-full bg-sf/20 flex items-center justify-center text-sf shrink-0"
+              >
+                <Coffee size={18} className="stroke-[2.5]" />
+              </motion.div>
+              <h3 className="font-rajdhani text-[16px] sm:text-[18px] font-black text-wh tracking-tight leading-tight uppercase">
+                ডেভলপারকে এক কাপ কফি দিন (Support Developer)
+              </h3>
+            </div>
+            
+            <p className="text-[12px] sm:text-[13px] text-wh/85 leading-relaxed font-semibold max-w-3xl">
+              আমাদের এই স্বাধীন <span className="text-sf font-black uppercase">MyCampus</span> প্ল্যাটফর্মকে সচল রাখতে এবং নতুন আপডেট নিয়ে আসতে সাহায্য করুন! নিচে আপনার পছন্দের পেমেন্ট অ্যাপে ট্যাপ করলেই সরাসরি পেমেন্ট পেইজে চলে যাবেন। যেকোনো পরিমাণের উপহার পাঠাতে পারেন। ❤️
+            </p>
+
+            {/* Grid of Famous Indian UPI Applications */}
+            <div className="flex flex-wrap gap-2 w-full max-w-3xl pt-1">
+              {/* PhonePe */}
+              <button
+                onClick={() => handleUPIPayment('phonepe')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-[#5f259f] flex items-center justify-center shrink-0">
+                  <span className="text-wh font-black text-[10px]">P</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">PhonePe</span>
+              </button>
+
+              {/* Google Pay */}
+              <button
+                onClick={() => handleUPIPayment('gpay')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center shrink-0">
+                  <span className="text-wh font-black text-[9px]">G</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">Google Pay</span>
+              </button>
+
+              {/* Paytm */}
+              <button
+                onClick={() => handleUPIPayment('paytm')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-[#00baf2] flex items-center justify-center shrink-0">
+                  <span className="text-wh font-semibold text-[8px] tracking-tighter">pay</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">Paytm</span>
+              </button>
+
+              {/* FamPay */}
+              <button
+                onClick={() => handleUPIPayment('fampay')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-black flex items-center justify-center shrink-0">
+                  <span className="text-amber-400 font-extrabold text-[8px]">Fam</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">FamPay</span>
+              </button>
+
+              {/* Amazon Pay */}
+              <button
+                onClick={() => handleUPIPayment('amazonpay')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-[#ff9900] flex items-center justify-center shrink-0">
+                  <span className="text-slate-900 font-black text-[10px]">a</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">Amazon Pay</span>
+              </button>
+
+              {/* Navi */}
+              <button
+                onClick={() => handleUPIPayment('navi')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-[#00c29f] flex items-center justify-center shrink-0">
+                  <span className="text-wh font-extrabold text-[10px]">N</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">Navi</span>
+              </button>
+
+              {/* BHIM UPI */}
+              <button
+                onClick={() => handleUPIPayment('bhim')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
+              >
+                <div className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center shrink-0">
+                  <span className="text-orange-500 font-bold text-[8px]">B</span>
+                </div>
+                <span className="text-[10px] font-black text-slate-800 leading-none">BHIM UPI</span>
+              </button>
+            </div>
+
+            {/* Hidden raw ID, showing copy utility */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button 
+                onClick={handleCopyUPI}
+                className="flex items-center gap-1.5 py-1 px-3 rounded-full bg-wh/10 border border-wh/15 text-[10px] font-bold text-wh hover:bg-wh/20 transition-all cursor-pointer select-none active:scale-95 font-sans"
+              >
+                {copied ? (
+                  <>
+                    <Check size={11} className="text-green-400 stroke-[3]" />
+                    <span className="text-green-400">Copied UPI ID ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={11} />
+                    <span>Copy UPI ID / ইউপিআই আইডি কপি করুন</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Action Tools: Pay Intent, QR Toggle */}
+          <div className="flex flex-col sm:flex-row xl:flex-col items-stretch xl:items-end gap-2.5 shrink-0 w-full xl:w-auto self-stretch xl:self-center justify-center">
+            {/* Pay Via App (UPI URI Scheme) */}
+            <button
+              onClick={() => handleUPIPayment('generic')}
+              className="bg-sf hover:bg-sf/90 hover:-translate-y-0.5 active:translate-y-0 py-2.5 px-4 text-wh font-extrabold rounded-rs text-[12px] flex items-center justify-center gap-2 shadow-sm transition-all text-center select-none cursor-pointer"
+            >
+              <ExternalLink size={14} />
+              <span>Pay via Any App / যেকোনো অ্যাপ</span>
+            </button>
+
+            {/* View QR Toggle */}
+            <button
+              onClick={() => setShowQR(!showQR)}
+              className="py-2.5 px-4 bg-wh/10 border border-wh/20 hover:bg-wh/15 rounded-rs text-[11px] font-extrabold text-wh flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer select-none"
+            >
+              <QrCode size={14} />
+              <span>{showQR ? "Hide QR Code" : "Show QR Code / কিউআর কোড"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable/Animatable QR Box Section */}
+        <AnimatePresence>
+          {showQR && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-wh/10 mt-4 pt-4 flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div className="bg-wh p-2.5 rounded-rm ring-4 ring-wh/5 shadow-md shrink-0 border border-slate-100 flex flex-col items-center">
+                  <img
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=154x154&data=upi://pay?pa=BHARATPE09903189531%40yesbankltd%26pn%3DSayan%2520Kumar%2520Patra%26tn%3DCoffee%2520for%2520Developer%26cu%3DINR"
+                    alt="Donate UPI QR"
+                    className="w-[140px] h-[140px] object-cover pointer-events-auto rounded-sm"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[8px] font-black text-slate-800 tracking-tight text-center uppercase font-mono mt-1 px-1 bg-slate-50 border border-slate-100 rounded">
+                    BHARATPE QR
+                  </span>
+                </div>
+                
+                <div className="space-y-2 max-w-sm text-center sm:text-left">
+                  <h4 className="text-[14px] font-extrabold text-sf2 flex items-center justify-center sm:justify-start gap-1">
+                    <QrCode size={14} /> Scanner QR / স্ক্যান করুন
+                  </h4>
+                  <p className="text-[11px] text-wh/75 leading-relaxed font-semibold">
+                    যেকোনো পেমেন্ট অ্যাপ (Google Pay, PhonePe, Paytm, BHIM, YONO) দিয়ে উপরের কিউআর কোডটি স্ক্যান করে আপনার ইচ্ছেমতো উপহার দিতে পারেন।
+                  </p>
+                  <p className="text-[9.5px] text-wh/50 tracking-wider uppercase font-bold">
+                    * Supports standard secure UPI payments (No additional platform charges)
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

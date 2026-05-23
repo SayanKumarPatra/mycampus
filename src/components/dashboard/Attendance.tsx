@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CalendarCheck, Pencil, ChartPie, History, Check, X, Info, ChevronRight, Loader2, RotateCcw, FileDown } from 'lucide-react';
+import { CalendarCheck, Pencil, ChartPie, History, Check, X, Info, ChevronRight, Loader2, RotateCcw, FileDown, Sparkles, Gift, Coffee } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, AttendanceRecord, AttendanceSubject, AttendanceConfig } from '../../types';
 import { attendanceService } from '../../services/attendanceService';
@@ -26,6 +26,14 @@ export default function Attendance({ user }: AttendanceProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [attConfig, setAttConfig] = useState<AttendanceConfig>({ subjects: [] });
+
+  const todayDateObj = new Date();
+  const todayDOW = todayDateObj.getDay(); // 0 is Sunday, 6 is Saturday
+  const isSaturday = todayDOW === 6;
+  const isSunday = todayDOW === 0;
+  const isHolidayToday = 
+    (isSaturday && !attConfig.allowSaturdayAttendance) || 
+    (isSunday && !attConfig.allowSundayAttendance);
 
   useEffect(() => {
     const fetchAndSubscribe = async () => {
@@ -57,11 +65,13 @@ export default function Attendance({ user }: AttendanceProps) {
   }, [user.id]);
 
   const handleMark = (idx: number, status: 'present' | 'absent') => {
+    if (isHolidayToday) return;
     setMarkedToday(prev => ({ ...prev, [idx]: status }));
     setHasChanges(true);
   };
 
   const handleReset = (idx: number) => {
+    if (isHolidayToday) return;
     setMarkedToday(prev => {
       const copy = { ...prev };
       delete copy[idx];
@@ -71,6 +81,7 @@ export default function Attendance({ user }: AttendanceProps) {
   };
 
   const handleSave = async () => {
+    if (isHolidayToday) return;
     setSaving(true);
     const today = getLocalDateString();
     const record: AttendanceRecord = {
@@ -268,7 +279,81 @@ export default function Attendance({ user }: AttendanceProps) {
 
       {/* Mark Section */}
       <div className="bg-wh border border-bc rounded-rm p-4 sm:p-5 shadow-ss">
-        <div className="flex items-center gap-2 mb-4">
+        {isHolidayToday ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="py-12 px-4 flex flex-col items-center text-center relative pointer-events-auto w-full"
+          >
+            {/* Background elements */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-amber-200/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+            
+            {/* Pulsing/bouncing elements */}
+            <div className="relative mb-6">
+              <motion.div 
+                animate={{ 
+                  y: [0, -12, 0],
+                  rotate: [0, 8, -8, 0]
+                }}
+                transition={{ 
+                  duration: 4, 
+                  repeat: Infinity,
+                  ease: "easeInOut" 
+                }}
+                className="w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200/60 rounded-full flex items-center justify-center border border-amber-300 shadow-md text-amber-600 relative z-10"
+              >
+                <Coffee size={32} className="stroke-[1.75]" />
+              </motion.div>
+              
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.7, 0.3] }}
+                transition={{ duration: 2.5, repeat: Infinity }}
+                className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center"
+              >
+                <Sparkles size={10} className="text-wh" />
+              </motion.div>
+
+              <motion.div 
+                animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.8, 0.4] }}
+                transition={{ duration: 3, delay: 0.5, repeat: Infinity }}
+                className="absolute -bottom-1 -left-1 w-5 h-5 bg-pink-400 rounded-full flex items-center justify-center"
+              >
+                <Gift size={11} className="text-wh" />
+              </motion.div>
+            </div>
+
+            {/* Sparkle background effects */}
+            <div className="absolute top-6 left-1/4">
+               <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }} className="text-amber-400 opacity-60">
+                 <Sparkles size={16} />
+               </motion.div>
+            </div>
+            
+            <div className="absolute bottom-6 right-1/4">
+               <motion.div animate={{ rotate: -360 }} transition={{ duration: 8, repeat: Infinity, ease: 'linear' }} className="text-amber-500 opacity-60">
+                 <Sparkles size={14} />
+               </motion.div>
+            </div>
+
+            <h3 className="text-base sm:text-lg font-black text-amber-950 flex items-center gap-2 relative z-10 font-sans tracking-tight">
+              আজ একটি চমৎকার ছুটির দিন! 🎉
+            </h3>
+            <p className="text-xs font-bold text-amber-800/85 mt-1 uppercase tracking-wider relative z-10 font-mono">
+              {new Date().toLocaleDateString('en-IN', { weekday: 'long' })} / {isSaturday ? 'Saturday' : 'Sunday'} Holiday
+            </p>
+
+            <div className="max-w-md mx-auto mt-4 px-3 py-3 bg-amber-50/60 border border-amber-200/55 rounded-rs shadow-ss relative z-10">
+              <p className="text-[12px] sm:text-[13px] text-amber-900 leading-relaxed font-semibold">
+                আজ উইকেন্ডের ছুটি হওয়ার কারণে কোনো নিয়মিত ক্লাস নেই। তাই আজ অ্যাটেনডেন্স গণনা করা হবে না (<b>Day Count হবে না</b>), এবং কেউ ম্যানুয়ালি উপস্থিতি দিতে পারবে না।
+              </p>
+              <p className="text-[10px] text-amber-700/80 mt-2 font-bold bg-amber-100/50 py-1.5 px-3.5 rounded border border-amber-200/40">
+                বিশেষ অনুরোধ: শুধুমাত্র এডমিন প্যানেল থেকে শনিবার/রবিবারের উপস্থিতি ইনপুট সক্রিয় করলে তবেই এই পেইজে আপনার সেশনের জন্য অ্যাটেনডেন্স দেওয়া সম্ভব হবে।
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 mb-4">
           <Pencil size={18} className="text-db" />
           <h3 className="text-[14px] font-bold text-dt">Mark Today's Progress</h3>
         </div>
@@ -339,9 +424,11 @@ export default function Attendance({ user }: AttendanceProps) {
                {saving ? <Loader2 size={16} className="spin-anim" /> : <Check size={16} />}
                {saving ? 'Syncing...' : hasChanges ? 'Update Database' : 'Attendance Saved'}
              </button>
-          </div>
-        </div>
-      </div>
+           </div>
+         </div>
+         </>
+        )}
+       </div>
 
       {/* Subject Wise Performance */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -411,18 +498,30 @@ export default function Attendance({ user }: AttendanceProps) {
             >
               <h4 className="text-xs font-bold text-dt mb-4">Current Week Overview</h4>
               <div className="grid grid-cols-7 gap-1.5 mb-2">
-                 {weeklyRecords.map((r, i) => (
+                 {weeklyRecords.map((r, i) => {
+                   const isTodayDate = r.dk === getLocalDateString();
+                   const isWeekendHoliday = (i === 0 && !attConfig.allowSundayAttendance && r.status === 'none') || 
+                                            (i === 6 && !attConfig.allowSaturdayAttendance && r.status === 'none');
+                   return (
                    <div key={i} className="flex flex-col items-center gap-2">
                       <span className="text-[10px] font-bold text-lt">{r.label}</span>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border transition-all
+                      <div className={`w-10 h-10 rounded-full flex flex-col items-center justify-center text-xs font-bold border transition-all relative overflow-hidden
                         ${r.status === 'present' ? 'bg-db text-wh border-db' : 
                           r.status === 'absent' ? 'bg-red-50 text-red-600 border-red-200' : 
-                          'bg-bg text-lt border-bc'}
-                        ${r.dk === getLocalDateString() ? 'ring-2 ring-offset-2 ring-sf' : ''}`}>
-                         {r.date}
+                          isWeekendHoliday ? 'bg-amber-50 text-amber-600 border-amber-200/50' : 'bg-bg text-lt border-bc'}
+                        ${isTodayDate ? 'ring-2 ring-offset-2 ring-sf' : ''}`}>
+                         <span className={isWeekendHoliday ? 'scale-90 font-bold' : ''}>
+                           {r.date}
+                         </span>
+                         {isWeekendHoliday && (
+                           <span className="absolute bottom-0.5 text-[6.5px] font-black uppercase text-amber-500/95 leading-none font-sans">
+                             HOL
+                           </span>
+                         )}
                       </div>
                    </div>
-                 ))}
+                    );
+                  })}
               </div>
             </motion.div>
           )}
@@ -454,6 +553,9 @@ export default function Attendance({ user }: AttendanceProps) {
                   const month = String(now.getMonth() + 1).padStart(2, '0');
                   const dateStr = `${year}-${month}-${day.toString().padStart(2, '0')}`;
                   const rec = attData.find(r => r.date === dateStr);
+                  const cellDate = new Date(year, now.getMonth(), day);
+                  const cellDOW = cellDate.getDay();
+                  const isCellHoliday = !rec && ((cellDOW === 0 && !attConfig.allowSundayAttendance) || (cellDOW === 6 && !attConfig.allowSaturdayAttendance));
                   let bgColor = 'bg-bg';
                   if (rec) {
                     const p = (rec.subjects || []).filter(s => s.status === 'present').length;
@@ -463,10 +565,18 @@ export default function Attendance({ user }: AttendanceProps) {
                   return (
                     <div 
                       key={i} 
-                      className={`aspect-square flex items-center justify-center rounded-sm text-[9px] font-bold border border-bc/30
-                        ${bgColor === 'bg-db' ? 'text-wh' : bgColor === 'bg-red-500' ? 'text-wh' : 'text-lt'} ${bgColor}`}
+                      className={`aspect-square flex flex-col items-center justify-center rounded-sm text-[9px] font-bold border relative
+                        ${bgColor === 'bg-db' ? 'text-wh bg-db border-db' : 
+                          bgColor === 'bg-red-500' ? 'text-wh bg-red-500 border-red-500' : 
+                          isCellHoliday ? 'text-amber-600 bg-amber-50/75 border-amber-200/40' :
+                          'text-lt bg-bg border-bc/30'}`}
                     >
-                      {day}
+                      <span>{day}</span>
+                      {isCellHoliday && (
+                        <span className="absolute bottom-0.5 text-[5.5px] font-black uppercase text-amber-500 scale-90 leading-none">
+                          H
+                        </span>
+                      )}
                     </div>
                   );
                 })}

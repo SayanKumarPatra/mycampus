@@ -84,6 +84,13 @@ export interface RoutineItem {
   isBreak?: boolean;
 }
 
+export interface DeviceNotification {
+  id: string;
+  title: string;
+  body: string;
+  publishedAt: number;
+}
+
 export interface AttendanceConfig {
   subjects: SubjectConfig[];
   materials: StudyMaterial[];
@@ -92,4 +99,8 @@ export interface AttendanceConfig {
   routine: RoutineItem[];
   faculties: FacultyMember[];
   geminiApiKey?: string;
+  allowSaturdayAttendance?: boolean;
+  allowSundayAttendance?: boolean;
+  deviceNotification?: DeviceNotification;
+  deviceNotificationHistory?: DeviceNotification[];
 }
