@@ -3,6 +3,9 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import webpush from 'web-push';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, get, set, onValue } from 'firebase/database';
 
 dotenv.config();
 
@@ -11,6 +14,184 @@ const PORT = 3000;
 
 // Body parser middleware
 app.use(express.json());
+
+// Initialize Firebase App for Server-Side sync & Web Push
+const firebaseConfig = {
+  apiKey: "AIzaSyAtsrglY37vRNbZN7BfZj8bwiH68DoelZs",
+  authDomain: "database-529ec.firebaseapp.com",
+  databaseURL: "https://database-529ec-default-rtdb.firebaseio.com/",
+  projectId: "database-529ec",
+  storageBucket: "database-529ec.firebasestorage.app",
+  messagingSenderId: "59037304674",
+  appId: "1:59037304674:web:b75bd1bfa92d9de8a84e3b"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+
+// Load consistent VAPID keys to prevent invalidation on restart
+let vapidKeys = {
+  publicKey: '',
+  privateKey: ''
+};
+
+async function initVapidKeys() {
+  try {
+    const configRef = ref(db, 'configs/vapidKeys');
+    const snapshot = await get(configRef);
+    if (snapshot.exists()) {
+      vapidKeys = snapshot.val();
+    } else {
+      const keys = webpush.generateVAPIDKeys();
+      await set(configRef, keys);
+      vapidKeys = keys;
+    }
+    webpush.setVapidDetails(
+      'mailto:sayankumarpatra2006@gmail.com',
+      vapidKeys.publicKey,
+      vapidKeys.privateKey
+    );
+    console.log("[MyCampus WebPush] Loaded consistent VAPID keys!");
+  } catch (error) {
+    console.error("[MyCampus WebPush] Error initializing keys, fallback auto-gen:", error);
+    const keys = webpush.generateVAPIDKeys();
+    vapidKeys = keys;
+    webpush.setVapidDetails(
+      'mailto:sayankumarpatra2006@gmail.com',
+      vapidKeys.publicKey,
+      vapidKeys.privateKey
+    );
+  }
+}
+
+// Subscribe user endpoint
+app.get('/api/notification/vapid-public-key', (req, res) => {
+  res.json({ publicKey: vapidKeys.publicKey });
+});
+
+app.post('/api/notification/subscribe', async (req, res) => {
+  const { subscription, userId } = req.body;
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Subscription data is invalid.' });
+  }
+
+  try {
+    const endpointHash = Buffer.from(subscription.endpoint).toString('base64').replace(/\//g, '_').replace(/\+/g, '-').replace(/=/g, '');
+    const subRef = ref(db, `configs/subscriptions/${endpointHash}`);
+    await set(subRef, {
+      subscription,
+      userId: userId || 'anonymous',
+      updatedAt: Date.now()
+    });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[MyCampus WebPush] Save subscription error:", error);
+    res.status(500).json({ error: 'Failed to register subscription.' });
+  }
+});
+
+// Broadcast Web Push to all registered browser notification endpoints
+async function broadcastNotification(payload: { title: string, body: string, url: string }) {
+  try {
+    const subsRef = ref(db, 'configs/subscriptions');
+    const snapshot = await get(subsRef);
+    if (!snapshot.exists()) {
+      console.log("[MyCampus WebPush] No active subscriptions found for broadcast.");
+      return;
+    }
+    const subscriptions = snapshot.val();
+    const keys = Object.keys(subscriptions);
+    console.log(`[MyCampus WebPush] Attempting to dispatch broadcast to ${keys.length} subscribers...`);
+
+    const promises = keys.map(async (key) => {
+      const subInfo = subscriptions[key];
+      const pushSubscription = subInfo.subscription;
+      try {
+        await webpush.sendNotification(
+          pushSubscription,
+          JSON.stringify(payload)
+        );
+      } catch (err: any) {
+        console.warn(`[MyCampus WebPush] Send failed for subscriber ${key}. Status:`, err.statusCode);
+        // If subscription has expired or unsubscribed, remove from DB to keep it clean!
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          console.log(`[MyCampus WebPush] Expired endpoint detected. Removing subscription ${key}.`);
+          const dRef = ref(db, `configs/subscriptions/${key}`);
+          await set(dRef, null);
+        }
+      }
+    });
+
+    await Promise.all(promises);
+    console.log("[MyCampus WebPush] Broadcast completed successfully!");
+  } catch (error) {
+    console.error("[MyCampus WebPush] Broadcast failure:", error);
+  }
+}
+
+// Listen to Realtime DB updates to automatically trigger Web Push broadcast
+let lastRegisteredNoticeId: string | null = null;
+let lastRegisteredAlertId: string | null = null;
+
+function setupDbListeners() {
+  const configRef = ref(db, 'configs/attendance');
+  onValue(configRef, async (snapshot) => {
+    if (!snapshot.exists()) return;
+    const config = snapshot.val();
+
+    // Check notices updates
+    if (config.notices && Array.isArray(config.notices) && config.notices.length > 0) {
+      const sorted = [...config.notices].sort((a, b) => (b.publishedAt || 0) - (a.publishedAt || 0));
+      const latestNotice = sorted[0];
+      if (latestNotice && latestNotice.id) {
+        if (lastRegisteredNoticeId === null) {
+          // Store first state on server startup without sending old ones
+          lastRegisteredNoticeId = latestNotice.id;
+        } else if (lastRegisteredNoticeId !== latestNotice.id) {
+          lastRegisteredNoticeId = latestNotice.id;
+          const now = Date.now();
+          const ageMs = now - (latestNotice.publishedAt || now);
+          // Only send if it was published in the last 15 minutes to avoid obsolete spam
+          if (ageMs < 15 * 60 * 1000) {
+            console.log(`[MyCampus WebPush] New Notice: "${latestNotice.title}". Broadcasting!`);
+            await broadcastNotification({
+              title: `MyCampus - ${latestNotice.tag || 'নতুন নোটিশ publicado'} 🔔`,
+              body: latestNotice.title,
+              url: '#notices'
+            });
+          }
+        }
+      }
+    }
+
+    // Check special administrative alerts
+    if (config.deviceNotification && config.deviceNotification.id) {
+      const latestAlert = config.deviceNotification;
+      if (lastRegisteredAlertId === null) {
+        lastRegisteredAlertId = latestAlert.id;
+      } else if (lastRegisteredAlertId !== latestAlert.id) {
+        lastRegisteredAlertId = latestAlert.id;
+        const now = Date.now();
+        const ageMs = now - (latestAlert.publishedAt || now);
+        if (ageMs < 15 * 60 * 1000) {
+          console.log(`[MyCampus WebPush] Administrative Alert: "${latestAlert.title}". Broadcasting!`);
+          await broadcastNotification({
+            title: latestAlert.title,
+            body: latestAlert.body,
+            url: '#home'
+          });
+        }
+      }
+    }
+  }, (err) => {
+    console.error("[MyCampus WebPush] Realtime DB listener error:", err);
+  });
+}
+
+// Initialize WebPush Engine on startup
+initVapidKeys().then(() => {
+  setupDbListeners();
+});
 
 // Initialize Gemini Client Lazily with robust checks
 let aiClient: GoogleGenAI | null = null;

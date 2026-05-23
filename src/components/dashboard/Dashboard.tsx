@@ -92,10 +92,56 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
   const [showNotificationGuide, setShowNotificationGuide] = useState(false);
   const [guideTab, setGuideTab] = useState<'android' | 'ios' | 'pc'>('android');
 
+  const subscribeToBackendWebPush = async () => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      
+      // Fetch public key
+      const response = await fetch('/api/notification/vapid-public-key');
+      const data = await response.json();
+      const publicKey = data.publicKey;
+      if (!publicKey) {
+        console.warn('VAPID public key not found');
+        return;
+      }
+
+      // Convert base64 to Uint8Array
+      const padding = '='.repeat((4 - publicKey.length % 4) % 4);
+      const base64 = (publicKey + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+
+      // Subscribe
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: outputArray
+      });
+
+      // Save to Web Push Server DB via Backend API
+      await fetch('/api/notification/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription, userId: user?.id || 'anonymous' })
+      });
+      console.log('Web Push subscription registered successfully!');
+    } catch (err) {
+      console.warn('Backend web push registration failed:', err);
+    }
+  };
+
   // Sync state permission
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
+      if (Notification.permission === 'granted') {
+        subscribeToBackendWebPush();
+      }
     }
     
     // Auto detect platform for instruction guide default
@@ -109,7 +155,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
         setGuideTab('pc');
       }
     }
-  }, []);
+  }, [user]);
 
   const requestNotificationPermission = async () => {
     if (typeof window === 'undefined' || !('Notification' in window)) {
@@ -127,6 +173,9 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
       const perm = await Notification.requestPermission();
       setNotificationPermission(perm);
       if (perm === 'granted') {
+        // Register Web Push to enable genuine background notifications when website is closed!
+        subscribeToBackendWebPush();
+
         const title = 'MyCampus - নোটিফিকেশন সচল ✓';
         const body = 'এখন নতুন কোনো নোটিশ অ্যাড করা হলে তা সরাসরি আপনার মোবাইলের হোম স্ক্রীন অথবা লক স্ক্রীনে নোটিফিকেশন আকারে চলে আসবে! 🔔';
         

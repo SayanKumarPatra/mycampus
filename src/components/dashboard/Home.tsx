@@ -514,7 +514,7 @@ export default function Home({ user, onNavigate }: HomeProps) {
       </div>
 
       {/* Developer Donation Section */}
-      <div className="bg-gradient-to-r from-db to-db2 rounded-rl p-5 text-wh relative overflow-hidden shadow-md mt-6 border border-wh/10">
+      <div className="bg-gradient-to-r from-db to-db2 rounded-rl p-5 text-wh relative overflow-hidden shadow-md mt-6 border border-wh/10 transform-gpu backface-hidden will-change-transform translate-z-0">
         <div className="absolute top-[-30px] right-[-30px] w-36 h-36 rounded-full bg-sf/5 pointer-events-none" />
         <div className="absolute bottom-[-40px] left-[-10px] w-24 h-24 rounded-full bg-wh/5 pointer-events-none" />
         
@@ -525,9 +525,9 @@ export default function Home({ user, onNavigate }: HomeProps) {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-4 bg-sf/20 border border-sf/40 py-2.5 px-4 rounded-rs text-[12px] font-bold text-sf flex items-center gap-2 shadow-md relative z-20 backdrop-blur-sm"
+              className="mb-4 bg-sf/20 border border-sf/40 py-2.5 px-4 rounded-rs text-[12px] font-bold text-sf flex items-center gap-2 shadow-md relative z-20 backdrop-blur-sm transform-gpu"
             >
-              <div className="w-2 h-2 rounded-full bg-sf animate-ping shrink-0" />
+              <div className="w-2 h-2 rounded-full bg-sf animate-pulse shrink-0" />
               <span>{paymentToast}</span>
             </motion.div>
           )}
@@ -537,13 +537,9 @@ export default function Home({ user, onNavigate }: HomeProps) {
           {/* Motivation Text & Interactive App Icons Grid */}
           <div className="min-w-0 flex-1 space-y-3 w-full">
             <div className="flex items-center gap-2">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="w-8 h-8 rounded-full bg-sf/20 flex items-center justify-center text-sf shrink-0"
-              >
+              <div className="w-8 h-8 rounded-full bg-sf/20 flex items-center justify-center text-sf shrink-0 animate-bounce" style={{ animationDuration: '3s' }}>
                 <Coffee size={18} className="stroke-[2.5]" />
-              </motion.div>
+              </div>
               <h3 className="font-rajdhani text-[16px] sm:text-[18px] font-black text-wh tracking-tight leading-tight uppercase">
                 ডেভলপারকে এক কাপ কফি দিন (Support Developer)
               </h3>
@@ -634,10 +630,10 @@ export default function Home({ user, onNavigate }: HomeProps) {
             </div>
 
             {/* Hidden raw ID, showing copy utility */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-1 font-sans">
               <button 
                 onClick={handleCopyUPI}
-                className="flex items-center gap-1.5 py-1 px-3 rounded-full bg-wh/10 border border-wh/15 text-[10px] font-bold text-wh hover:bg-wh/20 transition-all cursor-pointer select-none active:scale-95 font-sans"
+                className="flex items-center gap-1.5 py-1 px-3 rounded-full bg-wh/10 border border-wh/15 text-[10px] font-bold text-wh hover:bg-wh/20 transition-all cursor-pointer select-none active:scale-95"
               >
                 {copied ? (
                   <>
@@ -680,11 +676,11 @@ export default function Home({ user, onNavigate }: HomeProps) {
         <AnimatePresence>
           {showQR && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden transform-gpu"
             >
               <div className="border-t border-wh/10 mt-4 pt-4 flex flex-col sm:flex-row items-center justify-center gap-6">
                 <div className="bg-wh p-2.5 rounded-rm ring-4 ring-wh/5 shadow-md shrink-0 border border-slate-100 flex flex-col items-center">
