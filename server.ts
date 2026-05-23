@@ -90,6 +90,27 @@ app.post('/api/notification/subscribe', async (req, res) => {
   }
 });
 
+// Trigger and broadcast notification directly from application actions
+app.post('/api/notification/send', async (req, res) => {
+  const { title, body, url } = req.body;
+  if (!title || !body) {
+    return res.status(400).json({ error: 'Title and body are required for broadcasting.' });
+  }
+
+  try {
+    console.log(`[MyCampus WebPush API] Active push broadcast request received. Title: "${title}"`);
+    await broadcastNotification({
+      title,
+      body,
+      url: url || '#home'
+    });
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("[MyCampus WebPush API] Active broadcast failed:", error);
+    res.status(500).json({ error: error.message || 'Active broadcast fail' });
+  }
+});
+
 // Broadcast Web Push to all registered browser notification endpoints
 async function broadcastNotification(payload: { title: string, body: string, url: string }) {
   try {

@@ -103,4 +103,36 @@ export interface AttendanceConfig {
   allowSundayAttendance?: boolean;
   deviceNotification?: DeviceNotification;
   deviceNotificationHistory?: DeviceNotification[];
+  feedbacks?: Feedback[];
+  supporters?: Supporter[];
+  reportedSupporters?: ReportedSupporter[];
+}
+
+export interface Feedback {
+  id: string;
+  name: string;
+  roll: string;
+  rating: number; // 1-5
+  comment: string;
+  category: string;
+  createdAt: number;
+}
+
+export interface Supporter {
+  id: string;
+  name: string;
+  amount: number;
+  message?: string;
+  createdAt: number;
+}
+
+export interface ReportedSupporter {
+  id: string;
+  name: string;
+  amount: number;
+  appUsed: string;
+  refNo: string;
+  date: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: number;
 }
