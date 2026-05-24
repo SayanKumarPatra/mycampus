@@ -213,10 +213,32 @@ export default function Home({ user, onNavigate }: HomeProps) {
       // Save full config for syllabus tracking
       setGlobalConfig(config);
       
+      // Auto-set the activeSyllabusCode dynamically
+      setActiveSyllabusCode((prev) => {
+        const subjs = config.subjects || [];
+        const populated = subjs.find(s => s.topics && s.topics.length > 0);
+        
+        // If there are no populated subjects anywhere, fall back to previous or the first default SUBJECT
+        if (!populated) {
+          return prev || (SUBJECTS[0]?.code || '');
+        }
+        
+        // If the user already has a selection, only preserve it if that selected subject has topics
+        if (prev) {
+          const prevSubj = subjs.find(s => s.code === prev);
+          if (prevSubj && prevSubj.topics && prevSubj.topics.length > 0) {
+            return prev;
+          }
+        }
+        
+        // Otherwise, switch automatically to the first subject that has syllabus content!
+        return populated.code;
+      });
+      
       let total = 0, present = 0;
       
       SUBJECTS.forEach((subj, idx) => {
-        const subjConfig = config.subjects.find(c => c.code === subj.code) || { code: subj.code, totalClasses: 0 };
+        const subjConfig = (config.subjects || []).find(c => c.code === subj.code) || { code: subj.code, totalClasses: 0 };
         
         const subjPresent = (attendanceData.records || []).reduce((acc: number, r: any) => {
           const s = r.subjects?.[idx];

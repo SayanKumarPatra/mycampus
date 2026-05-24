@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, Mail, Phone, Book, Star } from 'lucide-react';
+import { Search, User, Mail, Phone, Book, Star, MessageCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { attendanceService } from '../../services/attendanceService';
 import { AttendanceConfig } from '../../types';
@@ -76,14 +76,23 @@ export default function Faculty() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 border-t border-bc bg-bg/30">
-              <a href={`mailto:${f.email}`} className="flex items-center justify-center gap-2 p-3 text-[10px] font-bold text-mt hover:bg-wh hover:text-db transition-colors border-r border-bc">
-                <Mail size={14} className="text-db" />
+            <div className="grid grid-cols-3 border-t border-bc bg-bg/30">
+              <a href={`mailto:${f.email}`} className="flex items-center justify-center gap-1.5 p-2.5 text-[9.5px] font-bold text-mt hover:bg-wh hover:text-db transition-colors border-r border-bc truncate">
+                <Mail size={13} className="text-db shrink-0" />
                 EMAIL
               </a>
-              <a href={`tel:${f.phone}`} className="flex items-center justify-center gap-2 p-3 text-[10px] font-bold text-mt hover:bg-wh hover:text-db transition-colors">
-                <Phone size={14} className="text-green-600" />
+              <a href={`tel:${f.phone}`} className="flex items-center justify-center gap-1.5 p-2.5 text-[9.5px] font-bold text-mt hover:bg-wh hover:text-db transition-colors border-r border-bc truncate">
+                <Phone size={13} className="text-blue-600 shrink-0" />
                 CALL
+              </a>
+              <a 
+                href={`https://wa.me/${(f.phone || '').replace(/[^0-9]/g, '').length === 10 && !(f.phone || '').replace(/[^0-9]/g, '').startsWith('91') ? `91${(f.phone || '').replace(/[^0-9]/g, '')}` : (f.phone || '').replace(/[^0-9]/g, '')}`} 
+                target="_blank" 
+                rel="noreferrer noopener" 
+                className="flex items-center justify-center gap-1.5 p-2.5 text-[9.5px] font-bold text-mt hover:bg-wh hover:text-emerald-600 transition-colors truncate"
+              >
+                <MessageCircle size={13} className="text-emerald-500 shrink-0" />
+                WHATSAPP
               </a>
             </div>
           </motion.div>

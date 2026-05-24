@@ -35,7 +35,7 @@ export const attendanceService = {
     try {
       const configRef = ref(db, 'configs/attendance');
       const snapshot = await get(configRef);
-      return snapshot.exists() ? snapshot.val() as AttendanceConfig : { subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] };
+      return snapshot.exists() ? sanitizeConfig(snapshot.val()) : { subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] };
     } catch (error) {
       console.error("RealtimeDB GetGlobalConfig Error:", error);
       return { subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] };
@@ -77,7 +77,7 @@ export const attendanceService = {
     const configRef = ref(db, 'configs/attendance');
     const unsubscribe = onValue(configRef, (snapshot) => {
       if (snapshot.exists()) {
-        callback(snapshot.val() as AttendanceConfig);
+        callback(sanitizeConfig(snapshot.val()));
       } else {
         callback({ subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] });
       }
@@ -89,3 +89,46 @@ export const attendanceService = {
     };
   }
 };
+
+function ensureArray<T>(val: any): T[] {
+  if (!val) return [];
+  if (Array.isArray(val)) {
+    return val.filter(item => item !== undefined);
+  }
+  if (typeof val === 'object') {
+    const arr: T[] = [];
+    Object.keys(val).forEach(key => {
+      const parsedKey = parseInt(key, 10);
+      if (!isNaN(parsedKey)) {
+        arr[parsedKey] = val[key];
+      }
+    });
+    return arr.filter(item => item !== undefined);
+  }
+  return [];
+}
+
+function sanitizeConfig(config: any): AttendanceConfig {
+  if (!config) {
+    return { subjects: [], materials: [], results: [], notices: [], routine: [], faculties: [] };
+  }
+  
+  const subjects = ensureArray(config.subjects).map((sub: any) => ({
+    ...sub,
+    topics: ensureArray(sub?.topics)
+  }));
+
+  return {
+    ...config,
+    subjects,
+    materials: ensureArray(config.materials),
+    results: ensureArray(config.results),
+    notices: ensureArray(config.notices),
+    routine: ensureArray(config.routine),
+    faculties: ensureArray(config.faculties),
+    feedbacks: ensureArray(config.feedbacks),
+    supporters: ensureArray(config.supporters),
+    reportedSupporters: ensureArray(config.reportedSupporters)
+  };
+}
+

@@ -57,16 +57,23 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
 
   const handleUpdateAttConfig = async (code: string, delta: number) => {
     const newConfig = { ...attConfig };
-    const subjects = newConfig.subjects || [];
+    const subjects = attConfig.subjects ? [...attConfig.subjects] : [];
     const idx = subjects.findIndex(s => s.code === code);
     if (idx !== -1) {
-      subjects[idx].totalClasses = Math.max(0, subjects[idx].totalClasses + delta);
+      subjects[idx] = {
+        ...subjects[idx],
+        totalClasses: Math.max(0, (subjects[idx].totalClasses ?? 0) + delta)
+      };
     } else {
-      subjects.push({ code, totalClasses: Math.max(0, delta) });
+      subjects.push({ 
+        code, 
+        totalClasses: Math.max(0, delta),
+        syllabusProgress: 0,
+        currentTopic: '',
+        topics: []
+      });
     }
     newConfig.subjects = subjects;
-    // We don't necessarily need to set state here because the subscription will update it,
-    // but setting it locally for immediate UI response is fine.
     setAttConfig(newConfig);
     await attendanceService.saveGlobalConfig(newConfig);
     setUpdateMsg(`Attendance updated for ${code} ✓`);
@@ -82,15 +89,15 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     }
   ) => {
     const newConfig = { ...attConfig };
-    const subjects = newConfig.subjects || [];
+    const subjects = attConfig.subjects ? [...attConfig.subjects] : [];
     const idx = subjects.findIndex(s => s.code === code);
     
     if (idx !== -1) {
       subjects[idx] = { 
         ...subjects[idx], 
-         syllabusProgress: fields.syllabusProgress !== undefined ? fields.syllabusProgress : subjects[idx].syllabusProgress,
-         currentTopic: fields.currentTopic !== undefined ? fields.currentTopic : subjects[idx].currentTopic,
-         topics: fields.topics !== undefined ? fields.topics : subjects[idx].topics
+        syllabusProgress: fields.syllabusProgress !== undefined ? fields.syllabusProgress : (subjects[idx].syllabusProgress ?? 0),
+        currentTopic: fields.currentTopic !== undefined ? fields.currentTopic : (subjects[idx].currentTopic ?? ''),
+        topics: fields.topics !== undefined ? fields.topics : (subjects[idx].topics ?? [])
       };
     } else {
       subjects.push({ 
