@@ -446,7 +446,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
       <header className="h-[64px] bg-db shrink-0 flex items-center px-4 gap-4 shadow-lg z-30 lg:z-10 border-b border-wh/5">
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="lg:hidden w-10 h-10 bg-wh/10 text-wh rounded-rs flex items-center justify-center shrink-0"
+          className="w-10 h-10 bg-wh/10 text-wh rounded-rs flex items-center justify-center shrink-0"
         >
           <Menu size={24} />
         </button>
@@ -629,93 +629,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Desktop */}
-        <aside className="hidden lg:flex flex-col w-[240px] bg-wh border-r border-bc shrink-0">
-          <div 
-            onClick={() => triggerPageChange('profile')}
-            className="p-4 bg-gradient-to-br from-db to-db2 border-b border-bc shadow-sm cursor-pointer hover:from-db2 hover:to-db3 transition-all duration-300 group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full border-2 border-wh/40 bg-sf overflow-hidden flex items-center justify-center font-rajdhani text-lg font-bold text-db shrink-0 group-hover:scale-105 transition-transform">
-                {user.photo ? <img src={user.photo} className="w-full h-full object-cover" /> : getInitials(user.name)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-bold text-wh truncate">{user.name}</h2>
-                <p className="text-[10px] text-wh/60 truncate">Roll: {user.roll}</p>
-                <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 bg-sf rounded-full w-fit">
-                   <Star size={8} className="text-db fill-db" />
-                   <span className="text-[9px] font-bold text-db uppercase">{user.semester}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 py-4 overflow-y-auto">
-            {sections.map(sec => (
-              <div key={sec} className="mb-4">
-                <h3 className="px-4 text-[9px] font-extrabold text-lt uppercase tracking-widest mb-1.5">{sec} Menu</h3>
-                {pages.filter(p => p.section === sec).map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      triggerPageChange(p.id as PageId);
-                      setIsSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all border-l-3
-                      ${activePage === p.id 
-                        ? 'bg-db/10 border-db text-db font-bold' 
-                        : 'border-transparent text-mt hover:bg-bg hover:text-db'}`}
-                  >
-                    <p.icon size={20} className={activePage === p.id ? 'text-db' : 'text-mt'} />
-                    {p.label}
-                    {p.badge && (
-                      <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[10px] text-wh font-bold ${p.badgeColor || 'bg-sf'}`}>
-                        {p.badge}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ))}
-            <div className="mt-4 border-t border-bc pt-4">
-              <button 
-                onClick={onLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-all border-l-3 border-transparent"
-              >
-                <LogOut size={20} />
-                Logout
-              </button>
-            </div>
-          </nav>
-          
-          <footer className="p-4 border-t border-bc bg-slate-950 text-slate-300 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-12 h-12 bg-sf/5 rounded-full filter blur-md" />
-             <p className="text-[10px] font-black text-wh uppercase tracking-wider relative z-10 text-center">
-               MyCampus Student Hub
-             </p>
-             <p className="text-[8px] text-slate-400 leading-relaxed italic mt-1 relative z-10 text-center">
-               "Independent student-made platform, not officially affiliated with EIILM Kolkata."
-             </p>
-             <div className="mt-3 pt-2.5 border-t border-slate-900 flex flex-col gap-1 relative z-10">
-               <div className="flex items-center justify-between">
-                 <p className="text-[9px] text-slate-400 font-semibold">Developed by <span className="text-sf font-black">HabaJaba Tech</span></p>
-               </div>
-               <div className="flex items-center justify-between">
-                 <p className="text-[8px] text-wh font-black uppercase tracking-wide">Sayan Kumar Patra</p>
-                 <a 
-                   href="https://wa.me/918145775413" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5 hover:underline"
-                 >
-                   <span>+91 81457 75413</span>
-                 </a>
-               </div>
-             </div>
-          </footer>
-        </aside>
-
-        {/* Sidebar - Mobile Drawer */}
+        {/* Sidebar - Mobile & Desktop Toggleable Drawer */}
         <AnimatePresence>
           {isSidebarOpen && (
             <>
@@ -724,14 +638,14 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsSidebarOpen(false)}
-                className="fixed inset-0 bg-dt/60 backdrop-blur-sm z-40 lg:hidden"
+                className="fixed inset-0 bg-dt/60 backdrop-blur-sm z-40"
               />
               <motion.aside 
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed top-0 left-0 bottom-0 w-[280px] bg-wh z-50 lg:hidden flex flex-col shadow-2xl"
+                className="fixed top-0 left-0 bottom-0 w-[280px] bg-wh z-50 flex flex-col shadow-2xl"
               >
                 <div 
                   onClick={() => {
@@ -832,7 +746,7 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-bg relative z-0">
-          <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28 lg:pb-8">
+          <div className="w-full max-w-full p-4 sm:p-6 pb-[110px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activePage}
@@ -853,78 +767,78 @@ export default function Dashboard({ user, onLogout, onUserUpdate }: DashboardPro
             </AnimatePresence>
           </div>
         </main>
-
-        {/* Mobile Bottom Navigation Bar - Premium Glassmorphic Capsule Layout */}
-        {(() => {
-          const mobileTabs = [
-            { id: 'home', label: 'Home', icon: LayoutDashboard },
-            { id: 'attendance', label: 'Class', icon: Fingerprint },
-            { 
-              id: 'notes', 
-              label: 'Notes', 
-              icon: BookOpen, 
-              badge: (attConfig.materials?.length || 0) > 0 ? attConfig.materials.length.toString() : undefined 
-            },
-            { 
-              id: 'notices', 
-              label: 'Notices', 
-              icon: BellRing, 
-              badge: (attConfig.notices?.length || 0) > 0 ? attConfig.notices.length.toString() : undefined 
-            },
-            { id: 'profile', label: 'Profile', icon: UserIcon }
-          ];
-
-          return (
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 w-full bg-wh/90 backdrop-blur-xl border-t border-bc px-3.5 pt-2 pb-safe-bottom shadow-[0_-8px_32px_rgba(0,0,0,0.06)] flex items-center justify-around h-[66px] z-30 rounded-t-[22px]">
-              {mobileTabs.map((item) => {
-                const isActive = activePage === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => triggerPageChange(item.id as PageId)}
-                    className="flex flex-col items-center justify-center flex-1 h-full py-1 relative active:scale-[0.96] group focus:outline-none z-10 select-none cursor-pointer"
-                  >
-                    {/* Glassmorphic Capsule Active Highlighting Layer */}
-                    {isActive && (
-                      <motion.div
-                        layoutId="glassyActiveBubble"
-                        className="absolute inset-x-1.5 inset-y-1 bg-db/[0.08] backdrop-blur-md border border-db/15 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.7),0_3px_12px_rgba(93,14,49,0.06)] rounded-[16px] z-0"
-                        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-                      />
-                    )}
-
-                    {/* Tab Elements - Icon and Label Layer */}
-                    <div className="relative z-10 flex flex-col items-center justify-center">
-                      <div className="relative">
-                        <item.icon 
-                          size={19} 
-                          className={`transition-all duration-300 ${isActive ? 'text-db scale-105' : 'text-mt/60 group-hover:text-db/80'}`} 
-                        />
-                        
-                        {item.badge && (
-                          <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] bg-red-500 text-wh font-black text-[7.5px] flex items-center justify-center px-1 rounded-full border border-wh shadow-sm">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-
-                      <span 
-                        className={`text-[8.5px] font-black tracking-wide mt-1.5 transition-all uppercase leading-none ${
-                          isActive 
-                            ? 'text-db font-black scale-105' 
-                            : 'text-mt/55 group-hover:text-db/75'
-                        }`}
-                      >
-                        {item.label}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          );
-        })()}
       </div>
+
+      {/* Mobile & Desktop Bottom Navigation Bar - Premium Glassmorphic Capsule Layout */}
+      {(() => {
+        const mobileTabs = [
+          { id: 'home', label: 'Home', icon: LayoutDashboard },
+          { id: 'attendance', label: 'Class', icon: Fingerprint },
+          { 
+            id: 'notes', 
+            label: 'Notes', 
+            icon: BookOpen, 
+            badge: (attConfig.materials?.length || 0) > 0 ? attConfig.materials.length.toString() : undefined 
+          },
+          { 
+            id: 'notices', 
+            label: 'Notices', 
+            icon: BellRing, 
+            badge: (attConfig.notices?.length || 0) > 0 ? attConfig.notices.length.toString() : undefined 
+          },
+          { id: 'profile', label: 'Profile', icon: UserIcon }
+        ];
+
+        return (
+          <div className="w-full bg-wh/90 backdrop-blur-xl border-t border-bc px-3.5 pt-2 pb-safe-bottom shadow-[0_-8px_32px_rgba(0,0,0,0.06)] flex items-center justify-around h-[66px] z-30 rounded-t-[22px] shrink-0">
+            {mobileTabs.map((item) => {
+              const isActive = activePage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => triggerPageChange(item.id as PageId)}
+                  className="flex flex-col items-center justify-center flex-1 h-full py-1 relative active:scale-[0.96] group focus:outline-none z-10 select-none cursor-pointer"
+                >
+                  {/* Glassmorphic Capsule Active Highlighting Layer */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="glassyActiveBubble"
+                      className="absolute inset-x-1.5 inset-y-1 bg-db/[0.08] backdrop-blur-md border border-db/15 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.7),0_3px_12px_rgba(93,14,49,0.06)] rounded-[16px] z-0"
+                      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                    />
+                  )}
+
+                  {/* Tab Elements - Icon and Label Layer */}
+                  <div className="relative z-10 flex flex-col items-center justify-center">
+                    <div className="relative">
+                      <item.icon 
+                        size={19} 
+                        className={`transition-all duration-300 ${isActive ? 'text-db scale-105' : 'text-mt/60 group-hover:text-db/80'}`} 
+                      />
+                      
+                      {item.badge && (
+                        <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] bg-red-500 text-wh font-black text-[7.5px] flex items-center justify-center px-1 rounded-full border border-wh shadow-sm">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    <span 
+                      className={`text-[8.5px] font-black tracking-wide mt-1.5 transition-all uppercase leading-none ${
+                        isActive 
+                          ? 'text-db font-black scale-105' 
+                          : 'text-mt/55 group-hover:text-db/75'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
       
       {/* Support Chatbot Modal Panel */}
       <SupportChatbot isOpen={isChatbotOpen} onClose={handleCloseChatbot} user={user} />

@@ -18,7 +18,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty' | 'chatbot' | 'device_notifications' | 'supporters'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all' | 'attendance' | 'materials' | 'results' | 'notices' | 'routine' | 'faculty' | 'chatbot' | 'device_notifications' | 'feedbacks'>('pending');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [updateMsg, setUpdateMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -674,7 +674,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
               { id: 'results', label: 'Results', icon: Award },
               { id: 'notices', label: 'Notices', icon: Megaphone },
               { id: 'device_notifications', label: 'Device Alerts 🔔', icon: Bell },
-              { id: 'supporters', label: 'Supporters & Feedback 🏆', icon: Trophy },
+              { id: 'feedbacks', label: 'Feedbacks 💬', icon: MessageSquare },
               { id: 'routine', label: 'Routine', icon: Calendar },
               { id: 'faculty', label: 'Faculty', icon: GraduationCap },
               { id: 'chatbot', label: 'Chatbot (AI)', icon: ShieldCheck }
@@ -1834,224 +1834,36 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                       <div className="lg:col-span-7 space-y-4">
                         <div className="p-1 px-2 border-b border-bc bg-slate-50 flex items-center gap-2 rounded-t-rs">
                           <Clock size={14} className="text-dt" />
-                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">নোটিফিকেশনের ইতিহাস / Alerts Broadcast Log</span>
+                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">নোটিফিকেশনের ইতিহাস / Push Alerts History</span>
                         </div>
 
                         <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                           {(attConfig.deviceNotificationHistory || []).map((notif) => (
-                            <div key={notif.id} className="bg-wh border border-bc rounded-rs p-3 flex items-start gap-3 hover:border-db/35 transition-colors group">
-                              <div className="p-2 bg-db/[0.04] text-db rounded-full shrink-0 mt-0.5">
-                                <Bell size={14} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2">
-                                  <h4 className="text-[12px] font-bold text-dt leading-tight">{notif.title}</h4>
-                                  <span className="text-[9px] text-lt font-semibold shrink-0">
-                                    {new Date(notif.publishedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
-                                  </span>
+                            <div key={notif.id} className="p-3 bg-bg/45 border border-bc rounded-rs space-y-2 hover:border-db transition-colors relative group">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <h5 className="text-[12px] font-bold text-slate-800">{notif.title}</h5>
+                                  <p className="text-[10.5px] text-slate-600 leading-normal mt-1">{notif.body}</p>
                                 </div>
-                                <p className="text-[10.5px] text-mt mt-1 leading-relaxed">{notif.body}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteDeviceNotification(notif.id)}
+                                  className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors self-start cursor-pointer"
+                                  title="Delete Alert"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
                               </div>
-                              <button 
-                                onClick={() => handleDeleteDeviceNotification(notif.id)}
-                                className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 shrink-0 ml-1 transition-all md:opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                title="Delete Notification from history"
-                              >
-                                <Trash2 size={13} />
-                              </button>
+                              <div className="text-[8.5px] text-slate-400 font-bold font-mono">
+                                {new Date(notif.publishedAt).toLocaleString()}
+                              </div>
                             </div>
                           ))}
 
                           {(attConfig.deviceNotificationHistory || []).length === 0 && (
                             <div className="py-12 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
-                               <Bell size={36} className="mx-auto mb-2 text-bc opacity-50" />
-                               <p className="text-xs text-mt italic">কোনো ডিভাইস নোটিফিকেশনের রেকর্ড খুঁজে পাওয়া যায়নি।</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : activeTab === 'supporters' ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-wh border border-bc rounded-rm p-6 shadow-ss space-y-6"
-                  >
-                    <div className="pb-4 border-b border-bc">
-                      <div className="flex items-center gap-2">
-                         <Trophy size={18} className="text-yellow-500" />
-                         <h3 className="text-base font-bold text-dt">Supporters Wall & Feedbacks Moderation Panel</h3>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                      {/* Left: Supporter Requests */}
-                      <div className="space-y-4">
-                        <div className="p-1 px-2 border-b border-bc bg-slate-50 flex items-center justify-between rounded-t-rs">
-                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">উপহারের রিপোর্ট সমূহ / Contribution Reports</span>
-                          <span className="text-[9.5px] px-1.5 py-0.5 bg-db/10 text-db font-bold rounded-full">
-                            {(attConfig.reportedSupporters || []).filter(r => r.status === 'pending').length} pending
-                          </span>
-                        </div>
-
-                        <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                          {(attConfig.reportedSupporters || []).map((rep) => (
-                            <div key={rep.id} className="bg-wh border border-bc rounded-rs p-3.5 space-y-3 hover:border-amber-400 transition-all text-slate-700">
-                              <div className="flex items-center justify-between gap-1.5 border-b border-bc pb-2">
-                                <div>
-                                  <h4 className="text-[12px] font-bold text-slate-800">{rep.name}</h4>
-                                  <span className="text-[9px] text-slate-400 font-bold block">{new Date(rep.createdAt).toLocaleString()}</span>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-xs font-black text-amber-500 block">₹{rep.amount}</span>
-                                  <span className="text-[8px] px-1.5 py-0.2 bg-slate-100 rounded text-slate-500 uppercase font-black font-mono">
-                                    {rep.appUsed}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-1 gap-1 text-[10.5px] font-semibold bg-bg/50 p-2 rounded-sm font-mono text-slate-600">
-                                <div>UTR: <span className="font-extrabold text-slate-800 select-all uppercase">{rep.refNo}</span></div>
-                                {rep.message && <div>Message: <span className="italic text-slate-500 font-sans font-medium">"{rep.message}"</span></div>}
-                              </div>
-
-                              <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-bc">
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase ${
-                                  rep.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                  rep.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-500'
-                                }`}>
-                                  Status: {rep.status}
-                                </span>
-                                
-                                <div className="flex gap-1.5 shrink-0">
-                                  {rep.status === 'pending' && (
-                                    <>
-                                      <button
-                                        onClick={() => handleApproveSupporter(rep)}
-                                        className="py-1 px-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] rounded-sm transition-all shadow-ss select-none cursor-pointer"
-                                      >
-                                        Approve ✓
-                                      </button>
-                                      <button
-                                        onClick={() => handleRejectSupporter(rep.id, rep.name)}
-                                        className="py-1 px-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] rounded-sm transition-all shadow-ss select-none cursor-pointer"
-                                      >
-                                        Reject ✗
-                                      </button>
-                                    </>
-                                  )}
-                                  <button
-                                    onClick={() => handleDeleteReportItem(rep.id)}
-                                    className="p-1 text-red-400 hover:text-red-700 hover:bg-red-50 rounded-full transition-all"
-                                    title="Delete Report Permanently"
-                                  >
-                                    <Trash2 size={13} />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-
-                          {(attConfig.reportedSupporters || []).length === 0 && (
-                            <div className="py-12 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
-                              <Trophy size={36} className="mx-auto mb-2 text-bc opacity-50" />
-                              <p className="text-xs text-mt italic">কোনো उपहार রিপোর্টের রেকর্ড নেই।</p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Approved Supporters List (On the Wall) */}
-                        <div className="p-1 px-2 border-b border-bc bg-slate-50 flex items-center justify-between rounded-t-rs mt-6">
-                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">দাতাদের দেওয়াল / Public Supporters Wall</span>
-                          <span className="text-[9.5px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-600 font-bold rounded-full">
-                            {(attConfig.supporters || []).length} approved
-                          </span>
-                        </div>
-
-                        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                          {(attConfig.supporters || []).map((sup) => (
-                            <div key={sup.id} className="bg-wh border border-bc rounded-rs p-3.5 flex items-center justify-between gap-4 text-slate-700">
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <h4 className="text-[11.5px] font-bold text-slate-800">{sup.name}</h4>
-                                  <span className="text-[9px] px-1.5 py-0.2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 rounded font-black font-mono">
-                                    ₹{sup.amount}
-                                  </span>
-                                </div>
-                                {sup.message && <span className="text-[10px] text-slate-400 italic font-medium">"{sup.message}"</span>}
-                              </div>
-                              <button
-                                onClick={() => handleDeleteSupporterItem(sup.id)}
-                                className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all shrink-0"
-                                title="Remove Supporter from Wall"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          ))}
-
-                          {(attConfig.supporters || []).length === 0 && (
-                            <div className="py-8 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
-                              <p className="text-xs text-mt italic">অ্যাপ্রুভড দাতাদের দেওয়াল বর্তমানে ফাকা।</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right: Feedback Feed */}
-                      <div className="space-y-4">
-                        <div className="p-1 px-2 border-b border-bc bg-slate-50 flex items-center justify-between rounded-t-rs">
-                          <span className="text-[11px] font-black uppercase text-dt tracking-wider">ব্যবহারকারীদের মতামত সমূহ / Classmate Reviews & Ratings</span>
-                          <span className="text-[9.5px] px-1.5 py-0.5 bg-db/10 text-db font-bold rounded-full">
-                            {(attConfig.feedbacks || []).length} total
-                          </span>
-                        </div>
-
-                        <div className="space-y-3 max-h-[800px] overflow-y-auto pr-1">
-                          {(attConfig.feedbacks || []).map((fb) => (
-                            <div key={fb.id} className="bg-wh border border-bc rounded-rs p-3.5 space-y-2.5 hover:border-db/30 transition-all text-slate-700">
-                              <div className="flex items-start justify-between gap-2 border-b border-bc pb-2">
-                                <div>
-                                  <div className="flex items-center gap-1.5">
-                                    <h4 className="text-[12px] font-bold text-slate-800">{fb.name}</h4>
-                                    <span className="text-[9.5px] px-1.5 bg-slate-100 text-slate-500 rounded font-bold font-mono">
-                                      {fb.roll}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-1 text-yellow-400 mt-1">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                      <Star key={i} size={9} className={i < fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'} />
-                                    ))}
-                                    <span className="text-[8.5px] text-slate-400 select-none font-bold ml-1">
-                                      {new Date(fb.createdAt).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                </div>
-                                <span className="px-2 py-0.5 text-[8px] font-black uppercase bg-db/5 text-db rounded">
-                                  {fb.category}
-                                </span>
-                              </div>
-
-                              <p className="text-[11px] text-slate-600 font-bold leading-relaxed whitespace-pre-line bg-bg/20 p-2 rounded-sm border border-bc/30">
-                                "{fb.comment}"
-                              </p>
-
-                              <div className="flex justify-end pt-1">
-                                <button
-                                  onClick={() => handleModerateFeedback(fb.id)}
-                                  className="py-1 px-3 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 text-[9.5px] font-bold rounded-rs transition-colors flex items-center gap-1 cursor-pointer"
-                                >
-                                  <Trash2 size={11} /> Delete Feedback
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-
-                          {(attConfig.feedbacks || []).length === 0 && (
-                            <div className="py-12 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
-                              <MessageSquare size={36} className="mx-auto mb-2 text-bc opacity-50" />
-                              <p className="text-xs text-mt italic">কোনো ফিডব্যাক জমা পড়েনি।</p>
+                              <Bell size={36} className="mx-auto mb-2 text-bc opacity-50" />
+                              <p className="text-xs text-mt italic">কোনো ইতিহাস পাওয়া যায়নি।</p>
                             </div>
                           )}
                         </div>
@@ -2095,6 +1907,71 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
                       <p className="text-[10px] text-lt leading-normal font-semibold">
                         * এই কী টি রিয়েলটাইমে ফায়ারবেস ডেটাবেসে সংরক্ষিত হবে এবং এটি সুরক্ষিত উপায়ে সবার চ্যাটবটে কাজ করবে।
                       </p>
+                    </div>
+                  </motion.div>
+                ) : activeTab === 'feedbacks' ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-wh border border-bc rounded-rm p-6 shadow-ss space-y-6"
+                  >
+                    <div className="flex items-center justify-between border-b border-bc pb-3">
+                      <div className="flex items-center gap-2">
+                        <MessageSquare size={18} className="text-db" />
+                        <h3 className="text-sm font-bold text-dt">Student Feedbacks & Suggestions</h3>
+                      </div>
+                      <span className="px-2.5 py-1 bg-db/5 border border-db/10 text-db text-[11px] font-black font-mono rounded-full">
+                        Total: {(attConfig.feedbacks || []).length} Feedbacks
+                      </span>
+                    </div>
+
+                    <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
+                      {(attConfig.feedbacks || []).map((fb) => (
+                        <div key={fb.id} className="p-4 bg-bg/40 border border-bc rounded-rs space-y-3 relative group hover:border-db/35 transition-colors">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <h4 className="text-[12px] font-bold text-slate-800">{fb.name}</h4>
+                                <span className="text-[9.5px] px-1.5 bg-slate-100 text-slate-500 rounded font-bold font-mono">
+                                  {fb.roll}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1 text-yellow-400 mt-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star key={i} size={10} className={i < fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'} />
+                                ))}
+                                <span className="text-[9px] text-slate-400 font-bold ml-1.5 font-mono">
+                                  {new Date(fb.createdAt).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="px-2 py-0.5 text-[8.5px] font-black uppercase bg-db/5 text-db rounded border border-db/10">
+                              {fb.category}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-600 font-medium leading-relaxed bg-wh p-3 rounded-sm border border-bc/50 whitespace-pre-line">
+                            "{fb.comment}"
+                          </p>
+
+                          <div className="flex justify-end pt-1">
+                            <button
+                              type="button"
+                              onClick={() => handleModerateFeedback(fb.id)}
+                              className="py-1 px-3 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 text-[9.5px] font-bold rounded-rs transition-colors flex items-center gap-1 cursor-pointer select-none active:scale-[0.98]"
+                            >
+                              <Trash2 size={11} /> Delete Feedback / মুছুন
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {(attConfig.feedbacks || []).length === 0 && (
+                        <div className="py-16 text-center border-2 border-dashed border-bc rounded-rs bg-bg/15">
+                          <MessageSquare size={36} className="mx-auto mb-2 text-bc opacity-50" />
+                          <p className="text-xs text-mt italic font-bold">কোনো সাজেশন বা ফিডব্যাক জমা পড়েনি।</p>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ) : filteredUsers.length === 0 ? (

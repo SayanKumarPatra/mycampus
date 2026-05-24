@@ -115,19 +115,14 @@ export default function Home({ user, onNavigate }: HomeProps) {
   };
 
   const handleUPIPayment = (app: 'gpay' | 'phonepe' | 'paytm' | 'bhim' | 'amazonpay' | 'fampay' | 'navi' | 'generic') => {
-    const upiId = 'BHARATPE09903189531@yesbankltd';
+    const upiId = 'Q423031154@ybl';
     
     // Parse input amount to double-precision secure format
     const parsedAmount = parseFloat(donateAmount);
     const cleanAmount = !isNaN(parsedAmount) && parsedAmount > 0 ? parsedAmount.toFixed(2) : '30.00';
     
-    // URL-encoded NPCI parameters
-    const encodedPn = encodeURIComponent('Sayan Kumar Patra');
-    // Using simple/neutral transactional note to bypass Paytm/GPay anti-phishing/risk policy blocks (e.g. "Coffee for Developer" is restricted)
-    const encodedTn = encodeURIComponent('MyCampus');
-    
-    // Standard secure universal UPI deep link
-    const upiLink = `upi://pay?pa=${upiId}&pn=${encodedPn}&tn=${encodedTn}&am=${cleanAmount}&cu=INR`;
+    // Standard secure universal UPI deep link matching user's exact working pattern: upi://pay?pa=Q423031154@ybl&pn=Rahul&cu=INR&am=...
+    const upiLink = `upi://pay?pa=${upiId}&pn=Rahul&cu=INR&am=${cleanAmount}`;
     
     // Auto-copy UPI ID to clipboard as a high-reliability fallback
     try {
@@ -172,7 +167,7 @@ export default function Home({ user, onNavigate }: HomeProps) {
   };
 
   const handleCopyUPI = () => {
-    const upiId = 'BHARATPE09903189531@yesbankltd';
+    const upiId = 'Q423031154@ybl';
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(upiId).then(() => {
@@ -604,7 +599,7 @@ export default function Home({ user, onNavigate }: HomeProps) {
       </div>
 
       {/* Developer Donation Section */}
-      <div className="bg-[#5d0e31] rounded-rl p-5 text-wh relative overflow-hidden shadow-md mt-6 border border-wh/10">
+      <div className="bg-[#5d0e31] rounded-rl p-6 text-wh relative overflow-hidden shadow-xl mt-6 border border-wh/10">
         <div className="absolute top-[-30px] right-[-30px] w-36 h-36 rounded-full bg-sf/5 pointer-events-none" />
         <div className="absolute bottom-[-40px] left-[-10px] w-24 h-24 rounded-full bg-wh/5 pointer-events-none" />
         
@@ -623,11 +618,11 @@ export default function Home({ user, onNavigate }: HomeProps) {
           )}
         </AnimatePresence>
 
-        <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
-          {/* Motivation Text & Interactive App Icons Grid */}
-          <div className="min-w-0 flex-1 space-y-4 w-full">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          {/* Motivation Text & Copy Block */}
+          <div className="min-w-0 md:col-span-7 space-y-4 w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-sf/20 flex items-center justify-center text-sf shrink-0">
+              <div className="w-8 h-8 rounded-full bg-sf/20 flex items-center justify-center text-sf shrink-0 animate-pulse">
                 <Coffee size={18} className="stroke-[2.5]" />
               </div>
               <h3 className="font-rajdhani text-[16px] sm:text-[18px] font-black text-wh tracking-tight leading-tight uppercase">
@@ -635,34 +630,19 @@ export default function Home({ user, onNavigate }: HomeProps) {
               </h3>
             </div>
             
-            <p className="text-[12px] sm:text-[13px] text-wh/85 leading-relaxed font-semibold max-w-3xl">
-              আমাদের এই স্বাধীন <span className="text-sf font-black uppercase">MyCampus</span> প্ল্যাটফর্মকে সচল রাখতে এবং নতুন আপডেট নিয়ে আসতে সাহায্য করুন!পরিমাণ পছন্দ করে পছন্দের পেমেন্ট অ্যাপে ক্লিক করুন। যেকোনো ক্ষুদ্র পরিমাণের উপহার ও অনেক বড় সাহায্য ডেকে আনে। ❤️
+            <p className="text-[12px] sm:text-[13px] text-wh/90 leading-relaxed font-semibold">
+              আমাদের এই স্বাধীন <span className="text-sf font-black uppercase">MyCampus</span> প্ল্যাটফর্মকে সচল রাখতে এবং নতুন আপডেট নিয়ে আসতে সাহায্য করুন! নিচে দেওয়া QR কোড স্ক্যান করে অথবা UPI ID কপি করে যেকোনো পেমেন্ট অ্যাপ (Google Pay, PhonePe, Paytm) দিয়ে আপনার ইচ্ছেমতো উপহার পাঠাতে পারেন। আপনার যেকোনো সাহায্যই আমাদের অনেক অনুপ্রাণিত করে। ❤️
             </p>
 
-            {/* NEW: Interactive Amount Input section with Chips & Custom keypad input */}
-            <div className="bg-white/10 p-3.5 rounded-rm border border-white/10 max-w-xl space-y-2.5 text-white">
-              <span className="text-[11px] font-black uppercase text-sf flex items-center gap-1 block">
-                <Coffee size={12} className="shrink-0" /> পরিমাণ নির্বাচন করুন (Enter / Tap Amount):
-              </span>
-              <div className="flex flex-wrap gap-2 items-center">
-                {['10', '20', '30', '50', '100', '200'].map((amt) => (
-                  <button
-                    key={amt}
-                    onClick={() => setDonateAmount(amt)}
-                    type="button"
-                    className={`px-3 py-1.5 rounded-sm text-[11px] font-black transition-all cursor-pointer select-none border ${
-                      donateAmount === amt
-                        ? 'bg-sf text-white border-sf shadow-ss scale-[1.03]'
-                        : 'bg-white/5 hover:bg-white/10 text-white/90 border-white/10'
-                    }`}
-                  >
-                    ₹{amt}
-                  </button>
-                ))}
+            {/* Custom Amount Input block */}
+            <div className="bg-white/10 p-4 rounded-rm border border-white/10 space-y-3.5 text-white">
+              <div>
+                <span className="text-[11px] font-black uppercase text-sf flex items-center gap-1">
+                  <Coffee size={12} className="shrink-0" /> উপহারের পরিমাণ (Enter Gift Amount in ₹):
+                </span>
                 
-                {/* Custom input */}
-                <div className="relative flex items-center rounded-sm bg-white/5 border border-white/10 pl-2 py-0.5 w-[95px] h-[28px]">
-                  <span className="text-[10px] font-black text-white/70">₹</span>
+                <div className="relative flex items-center bg-white/5 border border-white/20 hover:border-white/40 focus-within:border-sf rounded-rs px-3.5 py-2 mt-1.5 transition-all">
+                  <span className="text-sm font-black text-white/50 mr-2">₹</span>
                   <input
                     type="number"
                     value={donateAmount}
@@ -672,632 +652,174 @@ export default function Home({ user, onNavigate }: HomeProps) {
                         setDonateAmount(val);
                       }
                     }}
-                    placeholder="অন্যান্য"
-                    className="w-full bg-transparent outline-none border-none text-[10px] font-black text-white pl-1 pr-1 placeholder:text-white/40 placeholder:font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Grid of Famous Indian UPI Applications */}
-            <div className="space-y-1 w-full max-w-3xl">
-              <span className="text-[10px] font-black uppercase text-white/60 block">
-                পেমেন্ট করার জন্য অ্যাপ নির্বাচন করুন (Select Payment App):
-              </span>
-              <div className="flex flex-wrap gap-2 w-full pt-1">
-                {/* PhonePe */}
-                <button
-                  onClick={() => handleUPIPayment('phonepe')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-[#5f259f] flex items-center justify-center shrink-0">
-                    <span className="text-wh font-black text-[10px]">P</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">PhonePe</span>
-                </button>
-
-                {/* Google Pay */}
-                <button
-                  onClick={() => handleUPIPayment('gpay')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-blue-600 flex items-center justify-center shrink-0">
-                    <span className="text-wh font-black text-[9px]">G</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">Google Pay</span>
-                </button>
-
-                {/* Paytm */}
-                <button
-                  onClick={() => handleUPIPayment('paytm')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-[#00baf2] flex items-center justify-center shrink-0">
-                    <span className="text-wh font-semibold text-[8px] tracking-tighter">pay</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">Paytm (Highly Stable)</span>
-                </button>
-
-                {/* FamPay */}
-                <button
-                  onClick={() => handleUPIPayment('fampay')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-black flex items-center justify-center shrink-0">
-                    <span className="text-amber-400 font-extrabold text-[8px]">Fam</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">FamPay</span>
-                </button>
-
-                {/* Amazon Pay */}
-                <button
-                  onClick={() => handleUPIPayment('amazonpay')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-[#ff9900] flex items-center justify-center shrink-0">
-                    <span className="text-slate-900 font-black text-[10px]">a</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">Amazon Pay</span>
-                </button>
-
-                {/* Navi */}
-                <button
-                  onClick={() => handleUPIPayment('navi')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-[#00c29f] flex items-center justify-center shrink-0">
-                    <span className="text-wh font-extrabold text-[10px]">N</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">Navi UPI</span>
-                </button>
-
-                {/* BHIM UPI */}
-                <button
-                  onClick={() => handleUPIPayment('bhim')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-wh/95 text-slate-800 hover:bg-wh active:scale-95 transition-all shadow-ss cursor-pointer select-none border border-slate-200/50"
-                >
-                  <div className="w-5 h-5 rounded bg-slate-900 flex items-center justify-center shrink-0">
-                    <span className="text-orange-500 font-bold text-[8px]">B</span>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-800 leading-none">BHIM UPI</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Copy utility */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 font-sans">
-              <button 
-                onClick={handleCopyUPI}
-                className="flex items-center gap-1.5 py-1 px-3 rounded-full bg-wh/10 border border-wh/15 text-[10px] font-bold text-wh hover:bg-wh/20 transition-all cursor-pointer select-none active:scale-95"
-              >
-                {copied ? (
-                  <>
-                    <Check size={11} className="text-green-400 stroke-[3]" />
-                    <span className="text-green-400">Copied UPI ID ✓</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={11} />
-                    <span>Copy UPI ID / ইউপিআই আইডি কপি করুন</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Action Tools: Pay Intent, QR Toggle */}
-          <div className="flex flex-col sm:flex-row xl:flex-col items-stretch xl:items-end gap-2.5 shrink-0 w-full xl:w-auto self-stretch xl:self-center justify-center">
-            {/* Pay Via App (UPI URI Scheme) */}
-            <button
-              onClick={() => handleUPIPayment('generic')}
-              className="bg-sf hover:bg-sf/90 hover:-translate-y-0.5 active:translate-y-0 py-2.5 px-4 text-wh font-extrabold rounded-rs text-[12px] flex items-center justify-center gap-2 shadow-sm transition-all text-center select-none cursor-pointer"
-            >
-              <ExternalLink size={14} />
-              <span>Pay via Any App / যেকোনো অ্যাপ</span>
-            </button>
-
-            {/* View QR Toggle */}
-            <button
-              onClick={() => setShowQR(!showQR)}
-              className="py-2.5 px-4 bg-wh/10 border border-wh/20 hover:bg-wh/15 rounded-rs text-[11px] font-extrabold text-wh flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer select-none"
-            >
-              <QrCode size={14} />
-              <span>{showQR ? "Hide QR Code" : "Show QR Code / কিউআর কোড"}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Expandable/Animatable QR Box Section */}
-        <AnimatePresence>
-          {showQR && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="border-t border-wh/10 mt-4 pt-4 flex flex-col sm:flex-row items-center justify-center gap-6">
-                <div className="bg-wh p-2.5 rounded-rm ring-4 ring-wh/5 shadow-md shrink-0 border border-slate-100 flex flex-col items-center">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=154x154&data=upi://pay?pa=BHARATPE09903189531%40yesbankltd%26pn%3DSayan%2520Kumar%2520Patra%26tn%3DMyCampus%26am%3D${!isNaN(parseFloat(donateAmount)) && parseFloat(donateAmount) > 0 ? parseFloat(donateAmount).toFixed(2) : '30.00'}%26cu%3DINR`}
-                    alt="Donate UPI QR"
-                    className="w-[140px] h-[140px] object-cover pointer-events-auto rounded-sm"
-                    referrerPolicy="no-referrer"
-                  />
-                  <span className="text-[8px] font-black text-slate-800 tracking-tight text-center uppercase font-mono mt-1 px-1 bg-slate-50 border border-slate-100 rounded">
-                    BHARATPE QR
-                  </span>
-                </div>
-                
-                <div className="space-y-2 max-w-sm text-center sm:text-left">
-                  <h4 className="text-[14px] font-extrabold text-sf2 flex items-center justify-center sm:justify-start gap-1">
-                    <QrCode size={14} /> Scanner QR / স্ক্যান করুন
-                  </h4>
-                  <p className="text-[11px] text-wh/75 leading-relaxed font-semibold">
-                    যেকোনো পেমেন্ট অ্যাপ (Google Pay, PhonePe, Paytm, BHIM, YONO) দিয়ে উপরের কিউআর কোডটি স্ক্যান করে আপনার ইচ্ছেমতো উপহার দিতে পারেন।
-                  </p>
-                  <p className="text-[9.5px] text-wh/50 tracking-wider uppercase font-bold">
-                    * Supports standard secure UPI payments (No additional platform charges)
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* 🏆 SUPPORTERS SECTION & GRATITUDE WALL (দান ও কৃতজ্ঞতা ওয়াল) */}
-      <div className="bg-gradient-to-br from-db via-[#211736] to-db text-white border border-yellow-500/20 rounded-rl p-5 shadow-lg relative overflow-hidden space-y-4">
-        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-yellow-500/5 blur-xl pointer-events-none" />
-        <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-sf/5 blur-md pointer-events-none" />
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-wh/10 pb-3">
-          <div className="space-y-0.5">
-            <h3 className="font-rajdhani text-lg sm:text-xl font-black text-amber-400 flex items-center gap-2 uppercase tracking-tight">
-              <Sparkles className="animate-pulse text-amber-400 shrink-0" size={20} />
-              উপহারদাতা কৃতজ্ঞতা ওয়াল (Supporters Wall)
-            </h3>
-            <p className="text-[11px] text-wh/70 font-semibold leading-none">
-              যারা আমাদের সার্ভার সচল রাখতে এবং অ্যাপটি ভালোবাসে উপহার পাঠিয়েছেন ❤️
-            </p>
-          </div>
-          
-          <button
-            onClick={() => setShowReportForm(!showReportForm)}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-3.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white text-[11px] font-black uppercase shadow-md active:scale-95 transition-all select-none cursor-pointer self-start sm:self-center"
-          >
-            {showReportForm ? <X size={12} /> : <Coffee size={12} />}
-            <span>{showReportForm ? 'Close / বন্ধ করুন' : 'Report Gift / উপহারটি জমা করুন'}</span>
-          </button>
-        </div>
-
-        {/* Support reporting form */}
-        <AnimatePresence>
-          {showReportForm && (
-            <motion.form
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              onSubmit={handleReportSupport}
-              className="bg-wh/5 border border-wh/10 rounded-rm p-3.5 space-y-3 overflow-hidden text-white"
-            >
-              <h4 className="text-[12px] font-black uppercase text-sf flex items-center gap-1.5">
-                <Coffee size={13} /> পেমেন্ট রিপোর্ট জমা করুন (Verification Request)
-              </h4>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-800">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-white/70 uppercase">আপনার ডিসপ্লে নাম (Your Name)</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={30}
-                    value={reportName}
-                    onChange={(e) => setReportName(e.target.value)}
-                    placeholder="নিজের নাম লিখুন"
-                    className="w-full bg-white border border-bc rounded pr-2 pl-2 py-1.5 text-[11px] font-bold outline-none"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-white/70 uppercase">পরিমাণ (Amount in ₹)</label>
-                    <input
-                      type="number"
-                      required
-                      min={10}
-                      value={reportAmt}
-                      onChange={(e) => setReportAmt(e.target.value)}
-                      placeholder="₹30"
-                      className="w-full bg-white border border-bc rounded pr-2 pl-2 py-1.5 text-[11px] font-bold outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-white/70 uppercase">পেমেন্ট অ্যাপ (UPI App)</label>
-                    <select
-                      value={reportApp}
-                      onChange={(e) => setReportApp(e.target.value)}
-                      className="w-full bg-white border border-bc rounded px-1.5 py-1.5 text-[11px] font-bold outline-none"
-                    >
-                      <option value="phonepe">PhonePe</option>
-                      <option value="gpay">Google Pay</option>
-                      <option value="paytm">Paytm</option>
-                      <option value="bhim">BHIM UPI</option>
-                      <option value="fampay">FamPay</option>
-                      <option value="amazonpay">Amazon Pay</option>
-                      <option value="navi">Navi</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-white/70 uppercase flex items-center gap-1">
-                    UPI Reference ID / Transaction ID (UTR UTR) <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={24}
-                    value={reportRef}
-                    onChange={(e) => setReportRef(e.target.value)}
-                    placeholder="১২ সংখ্যার UPI UTR / Ref No লিখুন"
-                    className="w-full bg-white text-slate-800 border border-bc rounded pr-2 pl-2 py-1.5 text-[11px] font-mono outline-none uppercase placeholder:text-slate-400"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-white/70 uppercase">ছোট বার্তা (Message for Developer)</label>
-                  <input
-                    type="text"
-                    maxLength={60}
-                    value={reportMsg}
-                    onChange={(e) => setReportMsg(e.target.value)}
-                    placeholder="যেমন: অ্যাপটি ম্যাপ ট্র্যাকিং-এ খুব সাহায্য করছে! (ঐচ্ছিক)"
-                    className="w-full bg-white text-slate-800 border border-bc rounded pr-2 pl-2 py-1.5 text-[11px] font-bold outline-none placeholder:text-slate-400"
+                    placeholder="এখানে পরিমাণ লিখুন (যেমন: 30, 50, 100)"
+                    className="w-full bg-transparent outline-none border-none text-sm font-black text-white placeholder:text-white/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-wh/10">
-                <span className="text-[9.5px] text-yellow-400/80 font-semibold leading-relaxed max-w-xs sm:max-w-md">
-                  ⚠️ সঠিক UPI ট্রানজেকশন রিফারেন্স আইডি দিন। এডমিন ভেরিফাই করার পর সাকসেস হলে নাম কৃতজ্ঞতা দেওয়ালে লাইভ দেখা যাবে।
+              {/* Enhanced Copy Helper */}
+              <div>
+                <span className="text-[10px] font-black uppercase text-wh/70 block mb-1.5">
+                  ইউপিআই আইডি কপি করুন (Copy UPI ID):
                 </span>
-                <button
-                  type="submit"
-                  disabled={isReportSubmitting}
-                  className="bg-sf hover:bg-sf/90 text-white font-extrabold px-5 py-2 rounded text-[11px] shadow-sm select-none shrink-0 cursor-pointer disabled:opacity-50"
+                <button 
+                  type="button"
+                  onClick={handleCopyUPI}
+                  className="w-full flex items-center justify-between py-2.5 px-4 rounded-rs bg-white text-[11px] font-extrabold text-slate-800 hover:bg-slate-50 transition-all border border-slate-200/50 shadow-md cursor-pointer select-none active:scale-[0.98] group"
                 >
-                  {isReportSubmitting ? 'জমা হচ্ছে...' : 'রিপোর্ট সাবমিট করুন ✓'}
+                  <span className="font-mono tracking-wide text-sf font-black break-all mr-2">Q423031154@ybl</span>
+                  {copied ? (
+                    <span className="flex items-center gap-1 text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200/50 uppercase tracking-wider shrink-0">
+                      <Check size={11} className="stroke-[3]" />
+                      Copied!
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[10px] font-black text-[#5d0e31] bg-[#5d0e31]/5 px-2 py-1 rounded border border-[#5d0e31]/10 uppercase tracking-wider shrink-0 group-hover:bg-[#5d0e31]/10">
+                      <Copy size={11} />
+                      Tap to Copy
+                    </span>
+                  )}
                 </button>
               </div>
-            </motion.form>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
 
-        {/* Success toast for Support Report */}
-        <AnimatePresence>
-          {reportSuccess && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="bg-green-500/10 border border-green-500/30 p-3.5 rounded-rm text-[11.5px] text-green-300 font-bold space-y-1"
-            >
-              <div className="flex items-center gap-1.5">
-                <CheckCircle size={15} />
-                <span>উপহার রিপোর্ট সফলভাবে রেকর্ড করা হয়েছে! 🎉</span>
-              </div>
-              <p className="font-semibold text-wh/75 text-[10px] pl-5">
-                আমরা আপনার পেমেন্ট রেফারেন্স মিলিয়ে দেখে ১০ মিনিটের মধ্যে কৃতজ্ঞতা ওয়ালে আপনার নামটি সোনালী বর্ডারে সাজিয়ে দেবো। পাশে থাকার জন্য অনেক অনেক ধন্যবাদ! ❤️
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Approved Supporters Horizontal Frame / Grid Wall */}
-        <div className="w-full">
-          {(!globalConfig?.supporters || globalConfig.supporters.length === 0) ? (
-            <div className="py-8 px-4 rounded-rm border border-wh/5 bg-wh/5 text-center flex flex-col items-center justify-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-amber-400 shrink-0">
-                <Coffee size={20} />
-              </div>
-              <span className="text-[12px] font-black text-amber-300">কৃতজ্ঞতা ওয়াল আপাতত ফাকা আছে</span>
-              <p className="text-[10px] text-wh/60 max-w-md font-semibold">
-                স্বাধীন MyCampus কে এগিয়ে নিতে ১ কাপ কফি উপহার দিন ও কৃতজ্ঞতা ওয়ালে নিজের নাম স্বর্ণাক্ষরে লিখে ফেলুন! ❤️
+          {/* Direct, Elegant QR Code Box Side Column */}
+          <div className="md:col-span-5 flex flex-col items-center justify-center w-full">
+            <div className="bg-white p-3 rounded-rm ring-4 ring-wh/5 shadow-2xl shrink-0 border border-slate-100 flex flex-col items-center w-fit max-w-full">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=154x154&data=upi://pay?pa=Q423031154%40ybl%26pn%3DRahul%26cu%3DINR%26am%3D${!isNaN(parseFloat(donateAmount)) && parseFloat(donateAmount) > 0 ? parseFloat(donateAmount).toFixed(2) : '30.00'}`}
+                alt="Donate UPI QR"
+                className="w-[144px] h-[144px] object-cover pointer-events-auto rounded-sm mb-1"
+                referrerPolicy="no-referrer"
+              />
+              <span className="text-[8px] font-black text-slate-800 tracking-tight text-center uppercase font-mono px-1.5 py-0.5 bg-slate-50 border border-slate-100 rounded">
+                YBL UPI QR
+              </span>
+            </div>
+            
+            <div className="mt-3 text-center space-y-1">
+              <h4 className="text-[12px] font-extrabold text-sf flex items-center justify-center gap-1">
+                <QrCode size={12} /> Scan the QR Code / স্ক্যান করুন
+              </h4>
+              <p className="text-[10px] text-wh/75 max-w-xs font-semibold leading-relaxed">
+                যেকোনো ইউপিআই অ্যাপ (Google Pay, PhonePe, Paytm, BHIM) দিয়ে এই QR কোডটি স্ক্যান করে উপহার দিতে পারেন।
               </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-              {globalConfig.supporters.map((sup, idx) => {
-                // Tier checks for fun display
-                const isSuperstar = sup.amount >= 100;
-                const isGold = sup.amount >= 50 && sup.amount < 100;
-                
-                return (
-                  <motion.div
-                    key={sup.id || idx}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    whileHover={{ scale: 1.03 }}
-                    className={`p-3 rounded-rm border relative overflow-hidden transition-all bg-[#0d091a] select-none ${
-                      isSuperstar 
-                        ? 'border-yellow-500 ring-2 ring-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.25)]' 
-                        : isGold 
-                        ? 'border-amber-500/60 shadow-md' 
-                        : 'border-white/10'
-                    }`}
-                  >
-                    {/* Glowing effect inside superstars */}
-                    {isSuperstar && (
-                      <div className="absolute -top-10 -right-10 w-20 h-20 bg-yellow-500/10 blur-xl pointer-events-none" />
-                    )}
-                    
-                    <div className="flex items-center gap-2 relative z-10">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
-                        isSuperstar ? 'bg-yellow-500/20 text-yellow-500' : isGold ? 'bg-amber-500/20 text-amber-500' : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {isSuperstar ? <Sparkles size={13} className="animate-spin duration-1000" /> : isGold ? <Trophy size={12} /> : <Heart size={12} className="fill-red-400" />}
-                      </div>
-                      
-                      <div className="min-w-0 flex-1 leading-tight">
-                        <span className="text-[11px] font-black text-white truncate block" title={sup.name}>
-                          {sup.name}
-                        </span>
-                        
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[9.5px] font-black tracking-tight text-yellow-400">
-                            ₹{sup.amount}
-                          </span>
-                          <span className={`text-[8px] px-1 py-0.2 rounded-sm uppercase font-black tracking-wide ${
-                            isSuperstar ? 'bg-yellow-500 text-slate-900' : isGold ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' : 'bg-white/5 text-white/60'
-                          }`}>
-                            {isSuperstar ? 'Superstar' : isGold ? 'Gold' : 'Donor'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {sup.message && (
-                      <p className="text-[9px] text-wh/75 font-semibold italic mt-2 border-t border-wh/5 pt-1.5 leading-snug truncate" title={sup.message}>
-                        "{sup.message}"
-                      </p>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* 💬 USER FEEDBACK SYSTEM PANEL (ব্যবহারকারী মতামত ও রেটিং গ্যালারি) */}
-      <div className="bg-white border border-slate-200 shadow-md rounded-rl p-5 space-y-5">
-        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <div className="w-9 h-9 rounded-full bg-db/10 text-db flex items-center justify-center shrink-0">
-            <MessageSquare size={18} />
+      {/* Suggestion / Feedback Section */}
+      <div className="bg-wh border border-bc rounded-rl p-5 md:p-6 shadow-sm mt-6">
+        <div className="flex items-center gap-2 mb-4 border-b border-bc pb-3">
+          <div className="w-8 h-8 rounded-full bg-db/5 border border-db/10 flex items-center justify-center text-db shrink-0">
+            <MessageSquare size={16} />
           </div>
           <div>
-            <h3 className="font-rajdhani text-[16px] sm:text-[18px] font-black text-slate-800 tracking-tight uppercase leading-none">
-              অ্যাপ রেটিং ও মতামত (Classmates Opinions & Feedback)
+            <h3 className="font-rajdhani text-[15px] sm:text-[17px] font-black text-slate-800 tracking-tight leading-tight uppercase">
+              ফিডব্যাক বা সাজেশন বাক্স (App Suggestions / Feedback)
             </h3>
-            <p className="text-[10.5px] text-slate-500 mt-1 font-semibold leading-none">
-              MyCampus অ্যাপ ও ম্যাপ ট্র্যাকিং সার্ভিসটি ব্যবহারে আপনার অনুভূতি শেয়ার করুন সবার সাথে!
-            </p>
+            <p className="text-[10px] text-mt mt-1 font-semibold">আপনার মতামত আমাদের অ্যাপ আরো উন্নত করতে সাহায্য করবে / Help us improve</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Form Left Col: Submit Feedbacks */}
-          <div className="lg:col-span-4 bg-slate-50 border border-slate-100 rounded-rm p-4 space-y-4">
-            <h4 className="text-[12px] font-black text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
-              <Smile size={14} className="text-db" /> আপনার মতামত দিন (Review Form)
-            </h4>
+        {feedbackSuccess ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 bg-green-50 border border-green-200 rounded-rs text-center"
+          >
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2 text-green-600">
+              <Check size={20} className="stroke-[3]" />
+            </div>
+            <h4 className="text-xs font-black text-green-800 uppercase tracking-wide">ধন্যবাদ! ফিডব্যাক সফল হয়েছে</h4>
+            <p className="text-[10.5px] text-green-700 mt-1">আপনার মূল্যবান সাজেশন ও ফিডব্যাক অ্যাডমিন প্যানেলে পাঠানো হয়েছে।</p>
+          </motion.div>
+        ) : (
+          <form onSubmit={handleFeedbackSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Category selector */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-dt uppercase tracking-wider block">ফিডব্যাকের ধরন / Category</label>
+                <div className="relative">
+                  <select
+                    value={feedbackCategory}
+                    onChange={(e) => setFeedbackCategory(e.target.value)}
+                    className="inp h-9 px-3 text-xs pr-8 appearance-none bg-wh focus:ring-1 focus:ring-db focus:border-db font-medium cursor-pointer"
+                  >
+                    <option value="Feature Request">💡 ফিচার অনুরোধ / Feature Request</option>
+                    <option value="Bug Report">🐛 সমস্যা বা বাগ রিপোর্ট / Bug Report</option>
+                    <option value="App Experience">⭐ সার্বিক অভিজ্ঞতা / App Experience</option>
+                    <option value="Miscellaneous">💬 অন্যান্য মতামত / Miscellaneous</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown size={14} />
+                  </div>
+                </div>
+              </div>
 
-            {feedbackSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-100 border border-green-200 text-green-700 p-4 rounded-rm text-[11.5px] font-bold text-center space-y-1.5"
-              >
-                <span>ধন্যবাদ! আপনার ফিডব্যাক সফলভাবে যুক্ত হয়েছে। 🎉</span>
-                <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                  ক্যাম্পাসের বন্ধুদের করা রিভিউ ওয়ালে আপনার রেটিংটি এখন লাইভ দেখা যাচ্ছে।
-                </p>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleFeedbackSubmit} className="space-y-4">
-                {/* Visual Interacitve Star Rating Box */}
-                <div className="space-y-1 text-center bg-white border border-slate-100 rounded p-2.5 shadow-sm">
-                  <span className="text-[9.5px] font-black uppercase text-slate-400 block mb-1">আপনার রেটিং (Tap to rate)</span>
-                  <div className="flex items-center justify-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
+              {/* Star rating selector */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-dt uppercase tracking-wider block">রেটিং দিন / Give Rating</label>
+                <div className="flex items-center gap-1.5 h-9 bg-slate-50 border border-bc rounded-rs px-3.5">
+                  {Array.from({ length: 5 }).map((_, idx) => {
+                    const ratingValue = idx + 1;
+                    return (
                       <button
-                        key={star}
+                        key={idx}
                         type="button"
-                        onClick={() => setFeedbackRating(star)}
-                        className="p-1 transition-all hover:scale-125 focus:scale-95 text-yellow-400"
+                        onClick={() => setFeedbackRating(ratingValue)}
+                        className={`transition-all hover:scale-115 active:scale-90`}
                       >
-                        <Star
-                          size={24}
-                          className={`cursor-pointer ${
-                            star <= feedbackRating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'
-                          }`}
+                        <Star 
+                          size={18} 
+                          className={`${
+                            ratingValue <= feedbackRating 
+                              ? 'text-yellow-400 fill-yellow-400' 
+                              : 'text-slate-200 hover:text-yellow-200'
+                          } transition-colors cursor-pointer`} 
                         />
                       </button>
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-db mt-1.5 block">
-                    {feedbackRating === 5 ? '💯 অসাধারণ! ৫/৫ রেটিং' : feedbackRating === 4 ? '⭐ খুব ভালো লেগেছে! ৪/৫' : feedbackRating === 3 ? '👍 ভালো লেগেছে! ৩/৫' : feedbackRating === 2 ? '⚠️ ঠিকঠাক আছে! ২/৫' : '❌ অনেক সংস্কার প্রয়োজন! ১/৫'}
+                    );
+                  })}
+                  <span className="text-[10.5px] font-black font-mono text-slate-500 ml-2">
+                    {feedbackRating}/5
                   </span>
                 </div>
-
-                {/* Category selectors */}
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-slate-500">কোন বিষয়ের ফিডব্যাক? (Category)</span>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['General 💬', 'Map Experience 🗺️', 'Speed & Performance ⚡', 'UI Design ✨', 'Syllabus Tracker 📚'].map((cat) => {
-                      const cleanName = cat.split(' ')[0] === 'Map' ? 'Map Experience' : cat.split(' ')[0] === 'Speed' ? 'Speed & Performance' : cat.split(' ')[0] === 'UI' ? 'UI Design' : cat.split(' ')[0] === 'Syllabus' ? 'Syllabus Tracker' : 'General';
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setFeedbackCategory(cleanName)}
-                          className={`px-2.5 py-1.5 rounded-full text-[9px] font-black transition-all cursor-pointer select-none border whitespace-nowrap ${
-                            feedbackCategory === cleanName
-                              ? 'bg-db border-db text-white shadow-ss'
-                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {cat}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Text comment */}
-                <div className="space-y-1">
-                  <span className="text-[10px] font-black uppercase text-slate-500">মন্তব্য লিখুন (Feedback Description)</span>
-                  <textarea
-                    required
-                    maxLength={200}
-                    value={feedbackComment}
-                    onChange={(e) => setFeedbackComment(e.target.value)}
-                    placeholder="ম্যাপটি খুব চমৎকার কাজ করছে, অনেক ধন্যবাদ আমাদের ক্যাম্পাস অ্যাপ উপহার দেওয়ার জন্য... (বা আপনার ইচ্ছেমতো অনুভুতি)"
-                    className="w-full bg-white border border-bc rounded pr-2.5 pl-2.5 py-2 text-[11px] font-bold text-slate-800 h-[85px] max-h-[85px] outline-none placeholder:text-slate-400 placeholder:font-semibold"
-                  />
-                  <div className="flex justify-between text-[9px] text-slate-400 font-bold leading-none">
-                    <span>* Students only</span>
-                    <span>{feedbackComment.length} / 200 chars</span>
-                  </div>
-                </div>
-
-                {/* Submit button */}
-                <button
-                  type="submit"
-                  disabled={isFeedbackSubmitting}
-                  className="w-full bg-db hover:bg-db/90 text-white font-black py-2 rounded text-[11.5px] transition-all cursor-pointer shadow-sm active:scale-[0.98] flex items-center justify-center gap-1.5 select-none disabled:opacity-50"
-                >
-                  <Send size={12} />
-                  <span>{isFeedbackSubmitting ? 'ফিডব্যাক সাবমিট হচ্ছে...' : 'ফিডব্যাক ও রেটিং পোষ্ট করুন'}</span>
-                </button>
-              </form>
-            )}
-          </div>
-
-          {/* Right Col: Feed and Stats */}
-          <div className="lg:col-span-8 space-y-4">
-            {/* Reviews Statistics header card */}
-            {(() => {
-              const reviews = globalConfig?.feedbacks || [];
-              const count = reviews.length;
-              const sum = reviews.reduce((acc, current) => acc + current.rating, 0);
-              const avg = count ? (sum / count).toFixed(1) : '5.0';
-              
-              // Percent calculation
-              const starCounts = [0, 0, 0, 0, 0]; // Index 0 for 1 star, Index 4 for 5 star
-              reviews.forEach(r => starCounts[Math.min(4, Math.max(0, r.rating - 1))]++);
-              
-              return (
-                <div className="bg-slate-50 border border-slate-100 rounded-rm p-3.5 flex flex-col sm:flex-row items-center justify-between gap-5">
-                  <div className="text-center sm:text-left space-y-1 shrink-0">
-                    <span className="text-[10px] font-black uppercase text-slate-400">সামগ্রিক ব্যবহারকারী রেটিং</span>
-                    <div className="flex items-center justify-center sm:justify-start gap-2">
-                      <span className="text-3xl font-extrabold text-slate-800 tracking-tighter">{avg}</span>
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-0.5 text-yellow-400">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star key={i} size={11} className={i < Math.round(Number(avg)) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'} />
-                          ))}
-                        </div>
-                        <span className="text-[9px] font-bold text-slate-400 block">{count} classmates rated</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Horizontal Bar Chart (Compact, looking exact professional App store reviews layout) */}
-                  <div className="flex-1 w-full max-w-xs space-y-1 font-sans">
-                    {[5, 4, 3, 2, 1].map((stars) => {
-                      const countForStars = starCounts[stars - 1];
-                      const pct = count ? Math.round((countForStars / count) * 100) : stars === 5 ? 100 : 0;
-                      return (
-                        <div key={stars} className="flex items-center gap-2 text-[9px] font-bold text-slate-500">
-                          <span className="w-2.5 text-right shrink-0">{stars}★</span>
-                          <div className="flex-1 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-yellow-400 h-full rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
-                          </div>
-                          <span className="w-6 text-right shrink-0 opacity-80">{pct}%</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* List feedbacks container */}
-            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-              {(!globalConfig?.feedbacks || globalConfig.feedbacks.length === 0) ? (
-                <div className="py-12 text-center text-slate-400 border border-slate-100 rounded-rm bg-slate-50/50">
-                  <MessageSquare size={24} className="mx-auto text-slate-200 mb-2" />
-                  <span className="text-[11.5px] font-bold">এখনো কোনো মতামত দেওয়া হয়নি</span>
-                  <p className="text-[9.5px] mt-1">আপনার রেটিং ও মতামত যুক্ত করে প্রথম রিভিউ প্রদানকারী বন্ধু হন! 👍</p>
-                </div>
-              ) : (
-                globalConfig.feedbacks.map((fb, idx) => (
-                  <motion.div
-                    key={fb.id || idx}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(6, idx) * 0.05 }}
-                    className="p-3.5 border border-slate-100 rounded-rm bg-white hover:bg-slate-50/40 hover:border-slate-200/50 transition-all space-y-2.5"
-                  >
-                    <div className="flex items-start justify-between gap-3 text-[11px]">
-                      <div className="flex items-center gap-2">
-                        {/* Avatar */}
-                        <div className="w-8 h-8 rounded-full bg-db/10 border border-db/5 text-db font-rajdhani text-[11px] font-black uppercase flex items-center justify-center shrink-0">
-                          {fb.name ? fb.name.substring(0, 2) : 'CM'}
-                        </div>
-                        <div className="leading-tight">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-extrabold text-slate-800">{fb.name}</span>
-                            <span className="text-[8px] px-1 bg-slate-100 border border-slate-200 text-slate-400 rounded-sm font-semibold tracking-wide font-mono uppercase">
-                              {fb.roll || 'STUDENT'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {/* Stars rating */}
-                            <div className="flex items-center gap-0.2 text-yellow-400">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star key={i} size={8} className={i < fb.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'} />
-                              ))}
-                            </div>
-                            <span className="w-1 h-1 rounded-full bg-slate-300" />
-                            <span className="text-[8px] text-slate-400 font-bold">
-                              {new Date(fb.createdAt).toLocaleDateString('bn-BD')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Category tag */}
-                      <span className="px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wide bg-db/5 text-db border border-db/10 rounded-full shrink-0">
-                        {fb.category || 'Feedback'}
-                      </span>
-                    </div>
-
-                    <p className="text-[11px] text-slate-700 font-bold leading-relaxed whitespace-pre-line pl-1.5 border-l-2 border-slate-200">
-                      {fb.comment}
-                    </p>
-                  </motion.div>
-                ))
-              )}
+              </div>
             </div>
-          </div>
-        </div>
+
+            {/* Comment field */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-extrabold text-dt uppercase tracking-wider block">আপনার মন্তব্য / Suggestion Message</label>
+              <textarea
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                placeholder="অ্যাপ সম্পর্কিত আপনার মন্তব্য বা সাজেশন এখানে লিখুন (যেমন: অমুক ফিচার যুক্ত করলে ভালো হতো বা ওই পেজ খুলছে না)..."
+                rows={3}
+                required
+                className="inp p-3 text-xs resize-none placeholder:text-slate-400 focus:ring-1 focus:ring-db focus:border-db"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isFeedbackSubmitting}
+              className="w-full sm:w-auto h-9 px-5 bg-db hover:bg-db2 text-white font-extrabold text-[11px] tracking-wider uppercase rounded shadow-ss transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {isFeedbackSubmitting ? (
+                <>মতামত পাঠানো হচ্ছে... ⏳</>
+              ) : (
+                <>
+                  <Send size={12} />
+                  মতামত জমা দিন 🚀
+                </>
+              )}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

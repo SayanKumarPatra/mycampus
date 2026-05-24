@@ -111,28 +111,28 @@ export default function Register({ onRegistered, onSwitchToLogin }: RegisterProp
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full py-4"
+        className="w-full py-1"
       >
-        <h2 className="font-rajdhani text-2xl font-bold text-db mb-1">MyCampus Account 🎓</h2>
-        <p className="text-xs text-mt mb-6">Join the Smart Student Portal</p>
+        <h2 className="font-rajdhani text-xl font-bold text-db mb-1">MyCampus Account 🎓</h2>
+        <p className="text-[10.5px] text-mt mb-3">Join the Smart Student Portal</p>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-100 rounded-rs text-red-600 text-[12px] font-semibold mb-4 flex items-start gap-2">
-            <ShieldAlert size={16} className="shrink-0 mt-0.5" />
+          <div className="p-2.5 bg-red-50 border border-red-100 rounded-rs text-red-600 text-[11px] font-semibold mb-3 flex items-start gap-1.5">
+            <ShieldAlert size={14} className="shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-3.5 p-3.5 border-2 border-dashed border-bc rounded-rm bg-bg cursor-pointer hover:border-db hover:bg-bg2 transition-all mb-4"
+          className="flex items-center gap-2.5 p-2 border border-dashed border-bc rounded-rm bg-bg cursor-pointer hover:border-db hover:bg-bg2 transition-all mb-3"
         >
-          <div className="w-14 h-14 rounded-full bg-bg2 flex items-center justify-center border-2 border-bc overflow-hidden shrink-0">
-            {photo ? <img src={photo} className="w-full h-full object-cover" /> : <Camera size={24} className="text-mt" />}
+          <div className="w-9 h-9 rounded-full bg-bg2 flex items-center justify-center border border-bc overflow-hidden shrink-0">
+            {photo ? <img src={photo} className="w-full h-full object-cover" /> : <Camera size={16} className="text-mt" />}
           </div>
           <div>
-            <div className="text-[13px] font-bold text-db">Upload Your Photo</div>
-            <div className="text-[11px] text-mt mt-0.5">Click to select · JPG/PNG · Max 2MB</div>
+            <div className="text-[11px] font-bold text-db leading-none">Upload Profile Photo</div>
+            <div className="text-[9.5px] text-mt mt-1">Click to select · JPG/PNG · Max 2MB</div>
           </div>
           <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handlePhotoChange} />
         </div>
@@ -262,47 +262,36 @@ export default function Register({ onRegistered, onSwitchToLogin }: RegisterProp
           <button 
             type="submit" 
             disabled={loading}
-            className="btn-primary mt-2"
+            className="btn-primary mt-1"
           >
-            {loading ? <Loader2 size={18} className="spin-anim" /> : <UserPlus size={18} />}
+            {loading ? <Loader2 size={16} className="spin-anim" /> : <UserPlus size={16} />}
             Submit Registration
           </button>
         </form>
 
-        <div className="text-center mt-4 text-[13px] text-mt">
-          Have account? <button onClick={onSwitchToLogin} className="text-sf font-bold hover:underline">Login Here</button>
+        <div className="text-center mt-3 text-[12.5px] text-mt">
+          Have account? <button onClick={onSwitchToLogin} className="text-sf font-black hover:underline">Login Here</button>
         </div>
 
-        <div className="mt-6 pt-5 border-t border-bc text-center">
-          <p className="text-[11px] font-bold text-dt tracking-wide">MyCampus Student Hub</p>
-          <p className="text-[9px] text-lt leading-relaxed italic mt-1.5 px-3">
-            "This is an independent student-made platform and is not officially affiliated with EIILM Kolkata."
+        <hr className="my-3 border-bc" />
+
+        <div className="mt-3 text-center">
+          <p className="text-[10px] font-bold text-dt tracking-wide">MyCampus Student Hub</p>
+          <p className="text-[8.5px] text-lt leading-relaxed italic mt-1 px-3">
+            "Independent student-made platform, not officially affiliated with EIILM Kolkata."
           </p>
 
-          {/* Premium Developer Tribute & Contact Profile */}
-          <div className="mt-5 p-3.5 bg-gradient-to-br from-[#0c142c] to-[#04091a] rounded-rm border border-[#1b264f] text-left relative overflow-hidden shadow-md">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-sf/5 rounded-full filter blur-xl" />
-            <div className="absolute -bottom-6 -left-6 w-14 h-14 bg-db/5 rounded-full filter blur-md" />
-            
-            <div className="relative z-10 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[8px] font-black text-sf uppercase tracking-widest bg-sf/10 border border-sf/20 px-2 py-0.5 rounded-full">
-                    👑 Lead Architect
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                </div>
-                <h4 className="text-[13px] font-black text-wh tracking-wide uppercase font-rajdhani">
-                  Sayan Kumar Patra
-                </h4>
-                <p className="text-[9.5px] text-slate-300 font-semibold mt-0.5">
-                  CEO & Founder, <span className="text-sf font-black">HabaJaba Tech</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider block">EIILM Student</span>
-                <span className="text-[8px] text-sf font-bold italic mt-0.5 block">Portal Creator</span>
-              </div>
+          {/* Compact Lead Architect Tribute Line to match login style and save space */}
+          <div className="mt-3 p-2 bg-gradient-to-r from-[#0c142c] to-[#04091a] rounded-rs border border-[#1b264f] text-left relative overflow-hidden shadow-sm flex items-center justify-between">
+            <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-sf/5 to-transparent pointer-events-none" />
+            <div className="relative z-10">
+              <span className="text-[7.5px] font-black text-sf uppercase tracking-wider block">👑 Lead Architect</span>
+              <h4 className="text-[11px] font-extrabold text-wh font-rajdhani leading-none mt-0.5">Sayan Kumar Patra</h4>
+              <p className="text-[8px] text-slate-300 mt-0.5">CEO, <span className="text-sf font-semibold">HabaJaba Tech</span></p>
+            </div>
+            <div className="text-right relative z-10 pr-1">
+              <span className="text-[7.5px] text-slate-400 font-bold uppercase tracking-wider block">EIILM Student</span>
+              <span className="text-[8px] text-sf font-semibold italic block leading-none mt-0.5">Creator 🎓</span>
             </div>
           </div>
 

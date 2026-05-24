@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyCampus</title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      // Initialize OneSignal only on the correct production domain to prevent domain mismatch restrictions from throwing errors/modal messages in non-production environments
+      if (window.location.hostname === 'mycampusdn9.vercel.app') {
+        OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.init({
+            appId: "61b3a989-bdb1-4b23-ae54-765bd6c30a03",
+          });
+        });
+      } else {
+        console.warn("OneSignal Web Push is bypassed on this hostname (" + window.location.hostname + ") to avoid domain restriction error.");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
